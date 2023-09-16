@@ -1,0 +1,8 @@
+font.size:  15
+legend.fontsize:  18
+xtick.direction:  "in"
+ytick.direction:  "in"
+xtick.major.size:  5.0
+xtick.minor.size:  3.0
+ytick.major.size:  5.0
+ytick.minor.size:  3.0
