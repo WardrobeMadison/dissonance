@@ -24,7 +24,7 @@ class PairedPulseFamilyParams:
         )
 
 
-class ChirpStimulusLed:
+class ChirpStimulusLedParams:
     protocolnames = ("chirpstimulusled",)
 
     def __init__(self, protocol):
@@ -45,7 +45,7 @@ class ChirpStimulusLed:
         )
 
 
-class ExpandingSpots:
+class ExpandingSpotsParams:
     protocolnames = ("expandingspots",)
 
     def __init__(self, protocol, epoch):

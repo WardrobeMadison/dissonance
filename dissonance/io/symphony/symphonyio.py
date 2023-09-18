@@ -4,7 +4,7 @@ from dissonance.io.symphony.cell import Cell
 from dissonance.io.symphony.epoch import Epoch
 from dissonance.io.symphony.experiment import Experiment
 from dissonance.io.symphony.protocol import Protocol
-from dissonance.io.symphony.utils import rstarr_map_to_dict
+from dissonance.io.symphony.utils import RStarrConverter
 
 
 import h5py
@@ -15,10 +15,12 @@ import logging
 import re
 from pathlib import Path
 
+logger = logging.getLogger(__name__)
+
 
 class SymphonyIO:
 
-    def __init__(self, path: Path, rstarrdf: pd.DataFrame):
+    def __init__(self, path: Path):
         self.finpath = path
         self.fin = h5py.File(path)
         self.exp = Experiment(self.fin)
@@ -30,13 +32,17 @@ class SymphonyIO:
         redate = re.compile(r"^(\d\d\d\d)-(\d\d)-(\d\d).*$")
         matches = redate.match(path.name)
         self.expdate = f"{matches[1]}-{matches[2]}-{matches[3]}"
-        self.rstarmap = rstarr_map_to_dict(rstarrdf, self.expdate)
+        self.rstarr = RStarrConverter(self.expdate)
 
     def reader(self):
         for cell in self.exp.children:
             for protocol in cell.children:
                 for epoch in protocol.children:
                     yield cell, protocol, epoch
+
+        # log unique errors for rstarr conversions - conversion will be done in symphony soon
+        for error in self.rstarr.errors:
+            logger.warning(error)
 
     def to_h5(self, outputpath: Path):
         try:
@@ -195,9 +201,9 @@ class SymphonyIO:
         if protocol.name.lower() in ("ledpairedpulsefamily", "ledpairedpuslefamilyoriginal",):
             params.update(sm.PairedPulseFamilyParams(protocol, epoch).params)
         elif protocol.name.lower() == "chirpstimulusled":
-            params.update(sm.ChirpStimulusLed(protocol).params)
+            params.update(sm.ChirpStimulusLedParams(protocol).params)
         elif protocol.name == "ExpandingSpots":
-            params.update(sm.ExpandingSpots(protocol, epoch).params)
+            params.update(sm.ExpandingSpotsParams(protocol, epoch).params)
         elif protocol.name == "AdaptingSteps":
             params.update(sm.AdapatingSteps(protocol, epoch).params)
         epochgrp.attrs.update(params)
@@ -232,11 +238,5 @@ class SymphonyIO:
         epochgrp.attrs["lightamplitudeSU"] = lightamp
         epochgrp.attrs["lightmeanSU"] = lightmean
 
-        try:
-            epochgrp.attrs["lightamplitude"], epochgrp.attrs["lightmean"] = (
-                self.rstarmap[
-                    (protocol.name, protocol.get("led", None), lightamp, lightmean)])
-        except KeyError:
-            logging.warning(
-                f"RStarrConversionError: {','.join(map(str, (self.expdate, protocol.name, protocol.get('led',None),lightamp, lightmean)))}")
-            epochgrp.attrs["lightamplitude"], epochgrp.attrs["lightmean"] = -10000, -10000
+        epochgrp.attrs["lightamplitude"], epochgrp.attrs["lightmean"] = (
+            self.rstarr.map[(protocol.name, protocol.get("led", None), lightamp, lightmean)])

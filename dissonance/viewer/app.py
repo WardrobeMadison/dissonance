@@ -190,7 +190,6 @@ def run(epochio, analysis, unchecked, uncheckedpath: Path = None):
         app = QApplication(sys.argv)
         # app.setStyleSheet(STYLE)
         DissonanceUI(epochio, analysis, unchecked, uncheckedpath)
+        sys.exit(app.exec_())
     except Exception as e:
         print(e)
-    finally:
-        sys.exit(app.exec_())

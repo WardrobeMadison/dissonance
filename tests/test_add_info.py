@@ -1,18 +1,17 @@
 from multiprocessing import Pool
 import sys
 
-from dissonance.io.symphony.SymphonyIO import SymphonyIO
+from dissonance.io.symphony.symphonyio import SymphonyIO
 sys.path.append("..")
 from dissonance import io, init_log
 
 import pytest
 from pathlib import Path
-from dissonance.io import DissonanceUpdater, read_rstarr_table
+from dissonance.io import DissonanceUpdater, RStarrConverter
 
 from .constants import MAP_DIR, ROOT_DIR, RAW_DIR
 
 logger = init_log()
-rstarrdf = read_rstarr_table()
 
 folders = [#"WT", "DR",
     "GG2 control", 
@@ -28,7 +27,7 @@ def test_update_rstarr_file(geno, filename):
     geno = "GG2 control"
     filename = '2021-10-21A.h5'
 
-    rdr = SymphonyIO((RAW_DIR / geno) / filename, rstarrdf)
+    rdr = SymphonyIO((RAW_DIR / geno) / filename)
     rdr.update_rstarr((MAP_DIR / geno) / filename)
 
 @pytest.mark.parametrize("folder",folders)
@@ -43,14 +42,14 @@ def test_update_params_files(folder):
 
 
 def update(rawfile, mapfile):
-    rdr = SymphonyIO(rawfile, rstarrdf)
+    rdr = SymphonyIO(rawfile)
     rdr.update(mapfile, attrs=True)
 
 @pytest.mark.parametrize("folder",folders)
 def test_update_rstarr_files(folder):
     for rawfile, mapfile in zip_raw_map_directories(folder):
         try:
-            rdr = SymphonyIO(rawfile, rstarrdf)
+            rdr = SymphonyIO(rawfile)
             rdr.update_rstarr(mapfile)
         except Exception as e:
             logger.info(e)

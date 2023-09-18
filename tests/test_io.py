@@ -5,7 +5,7 @@ from multiprocessing import Pool
 from pathlib import Path
 
 from dissonance import epochtypes, io, viewer, init_log
-import dissonance.io.symphony.SymphonyIO
+import dissonance.io.symphony.symphonyio
 from .constants import ROOT_DIR, RAW_DIR, MAP_DIR
 
 logger = init_log()
@@ -64,7 +64,7 @@ def write_file(file, wodir, rstarrdf, overwrite=False):
         if (not overwrite) and ((wodir/file.name).exists()):
             return
         print(file)
-        sr = dissonance.io.symphony.SymphonyIO.SymphonyIO(file, rstarrdf)
+        sr = dissonance.io.symphony.symphonyio.SymphonyIO(file, rstarrdf)
         sr.to_h5(wodir / file.name)
     except Exception as e:
         logger.warning(f"FILEFAILED {file}")
