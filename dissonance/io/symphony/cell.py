@@ -1,5 +1,5 @@
 from dissonance.io.symphony.protocol import Protocol
-from dissonance.io.symphony.symphonyio import convert_if_bytes
+from dissonance.io.symphony.utils import convert_if_bytes
 
 
 import h5py

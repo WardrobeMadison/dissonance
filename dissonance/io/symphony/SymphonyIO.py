@@ -1,10 +1,10 @@
-from dissonance.funks import detect_spikes
+from dissonance.analysis_functions import detect_spikes
 from dissonance.io.symphony import symphonymapping as sm
-from dissonance.io.Cell import Cell
+from dissonance.io.symphony.cell import Cell
 from dissonance.io.symphony.epoch import Epoch
 from dissonance.io.symphony.experiment import Experiment
 from dissonance.io.symphony.protocol import Protocol
-from dissonance.io.symphony.symphonyio import rstarr_map_to_dict
+from dissonance.io.symphony.utils import rstarr_map_to_dict
 
 
 import h5py

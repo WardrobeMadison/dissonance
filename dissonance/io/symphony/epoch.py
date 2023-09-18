@@ -1,8 +1,6 @@
 from dissonance.io.symphony.background import Background
-from dissonance.io.symphony.protocol import Protocol
 from dissonance.io.symphony.response import Response
 from dissonance.io.symphony.stimulus import Stimulus
-
 
 import h5py
 
@@ -14,12 +12,14 @@ import re
 class Epoch:
 
     re_responses = re.compile(r"^([\w\d ]+)-.*$")
+    re_protocolname = re.compile(
+        r".*edu\.wisc\.sinhalab\.protocols\.([\w\d ]+)-.*$")
 
     def __init__(self, group: h5py.Group):
         self.group = group
         self.h5name = group.name
         self.name = "epoch"
-        self.protocolname = Protocol.re_name.match(
+        self.protocolname = self.re_protocolname.match(
             self.group.parent.parent.name)[1]
 
         self._backgrounds = dict()

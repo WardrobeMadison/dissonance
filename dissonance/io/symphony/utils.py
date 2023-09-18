@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 def read_rstarr_table():
     rstarrdf = pd.read_csv(
-        Path(__file__).parent.parent.parent / "data/rstarrmap.txt",
+        Path(__file__).parent.parent.parent.parent / "data/rstarrmap.txt",
         delimiter="\t",
         parse_dates=["startdate", "enddate"],
         dtype=dict(

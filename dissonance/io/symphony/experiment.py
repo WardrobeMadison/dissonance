@@ -1,5 +1,5 @@
 from dissonance.io.symphony.groupbase import GroupBase
-from dissonance.io.Cell import Cell
+from dissonance.io.symphony.cell import Cell
 
 
 import h5py

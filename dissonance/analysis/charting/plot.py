@@ -13,7 +13,7 @@ from matplotlib.pyplot import Axes
 from scipy.stats import sem, ttest_ind
 
 from ...epochtypes import IEpoch, WholeEpoch, WholeEpochs, SpikeEpoch, SpikeEpochs
-from ...funks import HillEquation, WeberEquation
+from ...analysis_functions import HillEquation, WeberEquation
 
 
 import logging
