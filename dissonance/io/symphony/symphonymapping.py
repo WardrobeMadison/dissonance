@@ -81,3 +81,46 @@ class AdapatingSteps:
             variable_post_flash_amp=protocol["variablePostFlashAmp"],
             variable_step_flash_amp=protocol["variableStepFlashAmp"],
         )
+
+
+class LedPairedSineWavePulse:
+    protocolnames = ("ledpairedsinewavepulse",)
+
+    def __init__(self, protocol, epoch):
+        self.params = dict(
+            first_wave_contrast = protocol["firstWaveContrast"],
+            first_wave_frequency = protocol["firstWaveFrequency"],
+            first_wave_time = protocol["firstWaveTime"],
+            intime = protocol["inTime"],
+            interpulse_interval = protocol["interpulseInterval"],
+            led = protocol["led"],
+            lightmean = protocol["lightMean"],
+            number_of_averages = protocol["numberOfAverages"],
+            pretime = protocol["preTime"],
+            second_wave_contrast = protocol["secondWaveContrast"],
+            second_wave_frequency = protocol["secondWaveFrequency"],
+            second_wave_time = protocol["secondWaveTime"],
+            tailtime=protocol["tailTime"],
+        )
+
+class LedPairedSquareWavePulse:
+    protocolnames = ("ledpairedsquarewavepulse",)
+
+    def __init__(self, protocol, epoch):
+        self.params = dict(
+            first_wave_contrast = protocol["firstWaveContrast"],
+            first_wave_frequency = protocol["firstWaveFrequency"],
+            first_wave_time = protocol["firstWaveTime"],
+            intime = protocol["inTime"],
+            interpulse_interval = protocol["interpulseInterval"],
+            led = protocol["led"],
+            lightmean = protocol["lightMean"],
+            number_of_averages = protocol["numberOfAverages"],
+            pretime = protocol["preTime"],
+            second_wave_contrast = protocol["secondWaveContrast"],
+            second_wave_frequency = protocol["secondWaveFrequency"],
+            second_wave_time = protocol["secondWaveTime"],
+            tailtime=protocol["tailTime"],
+        )
+
+

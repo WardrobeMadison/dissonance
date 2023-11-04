@@ -33,7 +33,7 @@ class IEpoch(ABC):
         self.tailtime = epochgrp.attrs.get("tailtime") * 10
         self.startdate = epochgrp.attrs.get("startdate")
         self.enddate = epochgrp.attrs.get("enddate")
-        self.number = int(epochgrp.name.split("/")[-1][5:])
+        self.number = float(epochgrp.name.split("/")[-1][5:])
         self.pctcontrast = (
             self.lightamplitude / self.lightmean
             if self.lightmean != 0.0

@@ -117,9 +117,6 @@ class DissonanceUI(QWidget):
 
         self.initConnections()
 
-        # SHOW WIDGET
-        self.showMaximized()
-        self.show()
 
         # SHOW LOGGING WINDOW
         #self.logger = LoggerDialog(self)
@@ -189,7 +186,9 @@ def run(epochio, analysis, unchecked, uncheckedpath: Path = None):
     try:
         app = QApplication(sys.argv)
         # app.setStyleSheet(STYLE)
-        DissonanceUI(epochio, analysis, unchecked, uncheckedpath)
+        widget = DissonanceUI(epochio, analysis, unchecked, uncheckedpath)
+        widget.showMaximized()
+        widget.show()
         sys.exit(app.exec_())
     except Exception as e:
         print(e)

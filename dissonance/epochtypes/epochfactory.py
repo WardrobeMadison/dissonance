@@ -9,6 +9,7 @@ from .sacaadeepoch import SaccadeEpoch
 from .chirpepoch import ChirpEpoch
 from .ledpairedpulsefamily import LedPairedPulseFamilyEpoch
 from .adaptingsteps import AdaptingStepsEpoch
+from .ledpairedsinewavepulse import LedPairedSineWavePulseEpoch
 
 EpochType = SpikeEpoch | WholeEpoch | NoiseEpoch | SaccadeEpoch | ChirpEpoch | LedPairedPulseFamilyEpoch | AdaptingStepsEpoch
 
@@ -33,5 +34,7 @@ def epoch_factory(epochgrp: h5py.Group) -> EpochType:
             return SpikeEpoch(epochgrp)
         elif tracetype == "wholetrace":
             return WholeEpoch(epochgrp)
+    elif protocolname in ("LedPairedSineWavePulse", ):
+        return LedPairedSineWavePulseEpoch(epochgrp)
     else:
         raise NotImplementedError(f"Trace type not yet specified for {epochgrp}")

@@ -65,7 +65,7 @@ class DissonanceReader:
                 else:
                     condition = True
                 if condition:
-                    number = f"{int(epochname[5:]):04d}"
+                    number = epochname[5:]
 
                     params = {key: epoch.attrs.get(key) for key in paramnames}
                     params["number"] = number
@@ -294,7 +294,7 @@ class EpochIO:
         if df.shape[0] != 0:
             def func(row):
                 try:
-                    return epoch_factory(self.files[row.exppath][f"epoch{int(row.number)}"])
+                    return epoch_factory(self.files[row.exppath][f"epoch{row.number}"])
                 except Exception:
                     print(row.exppath)
                     return None

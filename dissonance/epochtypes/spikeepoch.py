@@ -11,7 +11,11 @@ class SpikeEpoch(IEpoch):
 
     def __init__(self, epochgrp: h5py.Group):
         super().__init__(epochgrp)
-        self._spikegrp = epochgrp["Spikes"]
+        if "Spikes" in epochgrp:
+            self._spikegrp = epochgrp["Spikes"]
+        else: 
+            self._spikegrp = []
+
         self._psth = None
         self._binsize = 100
 

@@ -11,6 +11,7 @@ from . import sacaadeepoch as sa
 from . import chirpepoch as ce
 from . import adaptingsteps as ae
 from . import expandingspots as es
+from . import ledpairedsinewavepulse as wp
 
 def groupby(frame:pd.DataFrame, grpkeys) -> pd.DataFrame:
 	"""
@@ -26,6 +27,7 @@ def groupby(frame:pd.DataFrame, grpkeys) -> pd.DataFrame:
 	elif epochtype == ce.ChirpEpoch: types = ce.ChirpEpochs
 	elif epochtype == ae.AdaptingStepsEpoch: types = ae.AdpatingStepsEpochs
 	elif epochtype == es.ExpandingSpotsEpoch: types = es.ExpandingsSpotsEpochs
+	elif epochtype == wp.LedPairedSineWavePulseEpoch: types = wp.LedPairedSineWavePulseEpochs
 	else: types = None
 
 	data = []

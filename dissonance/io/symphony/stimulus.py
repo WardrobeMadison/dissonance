@@ -1,11 +1,7 @@
 from dissonance.io.symphony.utils import convert_if_bytes
-
-
 import h5py
-
-
 import re
-from typing import Dict, Iterator
+from typing import Iterator
 
 
 class Stimulus:
@@ -27,6 +23,6 @@ class Stimulus:
     def __getitem__(self, value):
         return self._parameters[value]
 
-    def __iter__(self) -> Iterator[Dict[str, object]]:
+    def __iter__(self) -> Iterator[dict[str, object]]:
         for key, val in self.group["parameters"].attrs.items():
             yield key, convert_if_bytes(val)

@@ -1,5 +1,6 @@
 from multiprocessing import Pool
 import sys
+from dissonance.io.symphony.rstarr_converter import RStarrConverter
 
 from dissonance.io.symphony.symphonyio import SymphonyIO
 sys.path.append("..")
@@ -7,7 +8,7 @@ from dissonance import io, init_log
 
 import pytest
 from pathlib import Path
-from dissonance.io import DissonanceUpdater, RStarrConverter
+from dissonance.io import DissonanceUpdater
 
 from .constants import MAP_DIR, ROOT_DIR, RAW_DIR
 

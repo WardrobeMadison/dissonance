@@ -19,7 +19,6 @@ folders = [
 
 @pytest.mark.parametrize("folder", folders)
 def test_all_to_h5(folder):
-    rstarrdf = io.read_rstarr_table()
 
     wdir = RAW_DIR / folder
 
@@ -27,12 +26,29 @@ def test_all_to_h5(folder):
     wodir.mkdir(parents=True, exist_ok=True)
 
     files = [file for file in wdir.glob("*.h5")]
-    func = partial(write_file, wodir=wodir, rstarrdf=rstarrdf, overwrite=False)
+    func = partial(write_file, wodir=wodir, overwrite=False)
 
     with Pool(min(len(files), 6)) as p:
         for x in p.imap_unordered(func, files):
             print(x)
 
+@pytest.mark.parametrize("folder", folders)
+def test_map_protocol(folder):
+    protocolname = "LedPairedSineWavePulse"
+    wdir = RAW_DIR / folder
+
+    wodir = (MAP_DIR / folder)
+    wodir.mkdir(parents=True, exist_ok=True)
+
+    files = [file for file in wdir.glob("*.h5")]
+    #func = partial(map_protocol, protocolname=protocolname, wodir=wodir)
+
+    #with Pool(min(len(files), 6)) as p:
+    #    for x in p.imap_unordered(func, files):
+    #        print(x)
+
+    for file in files:
+        map_protocol(file, protocolname, wodir)
 
 def get_missing_files():
     find_all_files = lambda dir: {
@@ -54,17 +70,24 @@ files = get_missing_files()
 @pytest.mark.parametrize("geno,filename", files, ids=(f"{x} {y}" for x, y in files))
 def test_to_h5(geno, filename):
 
-    rstarrdf = io.read_rstarr_table()
     write_file((RAW_DIR/geno) / filename,
-               (MAP_DIR/geno), rstarrdf, overwrite=True)
+               (MAP_DIR/geno), overwrite=True)
 
+def map_protocol(file, protocolname, wodir):
+    try:
+        print(file)
+        sr = dissonance.io.symphony.symphonyio.SymphonyIO(file)
+        sr.map_protocol(protocolname, wodir / file.name)
+    except Exception as e:
+        logger.warning(f"FILEFAILED {file}")
+        logger.warning(e)
 
-def write_file(file, wodir, rstarrdf, overwrite=False):
+def write_file(file, wodir, overwrite=False):
     try:
         if (not overwrite) and ((wodir/file.name).exists()):
             return
         print(file)
-        sr = dissonance.io.symphony.symphonyio.SymphonyIO(file, rstarrdf)
+        sr = dissonance.io.symphony.symphonyio.SymphonyIO(file)
         sr.to_h5(wodir / file.name)
     except Exception as e:
         logger.warning(f"FILEFAILED {file}")
