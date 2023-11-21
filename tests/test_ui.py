@@ -95,6 +95,17 @@ GA1Excitation = Params(
             "celltype", "cellname", "lightamplitude"],
 )
 
+GA1ExcitationFamily = Params(
+    name="GA1ExcitationFamily",
+    filter_path=Path(
+        "/home/joe/Projects/analysis/filters/GA1ledpulsefamilyexcitation/GA1ledpulsefamilyexcitation.txt"), #rod and cone
+    protocols=["LedPulseFamily"],
+    paramnames=["led", "protocolname", "celltype", "genotype", "cellname",
+                "lightmean", "lightamplitude", "tracetype", "startdate", "holdingpotential"],
+    splits=["led","holdingpotential", "genotype", "lightmean",
+            "celltype", "cellname", "lightamplitude"],
+)
+
 LedPulseOFFSRodSpikes = Params(
     name="LedPulseOFFSRodSpikes",
     filter_path=Path(
@@ -172,6 +183,7 @@ parameters = [
     (["GG2 KO", "GG2 control"], Weber),
     (["GG2 KO", "GG2 control"], SineWavePulse),
     (["GA1 KO", "GA1 control"], GA1SpikesFamily),
+    (["GA1 KO", "GA1 control"], GA1ExcitationFamily),
 ]
 
 
