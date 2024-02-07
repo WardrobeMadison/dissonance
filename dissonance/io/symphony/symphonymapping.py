@@ -123,4 +123,3 @@ class LedPairedSquareWavePulse:
             tailtime=protocol["tailTime"],
         )
 
-

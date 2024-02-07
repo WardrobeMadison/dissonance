@@ -12,11 +12,35 @@ class NoiseEpoch(IEpoch):
         super().__init__(epochgrp)
 
         self.stimparams = {key: val for key,
-                        val in epochgrp[self.led].attrs.items()}
+                        val in epochgrp['stimuli']["UV LED"].attrs.items()}
+
+        self.amp = epochgrp.attrs["amp"]
+        self.frequencycutoff = epochgrp.attrs["frequencycutoff"]
+        self.interpulseinterval = epochgrp.attrs["interpulseinterval"]
+        self.led = epochgrp.attrs["led"]
+        self.lightmean = epochgrp.attrs["lightmean"]
+        self.numberofaverages = epochgrp.attrs["numberofaverages"]
+        self.numberoffilters = epochgrp.attrs["numberoffilters"]
+        self.pretime = int(epochgrp.attrs["pretime"]*10)
+        self.repeatsperstdv = epochgrp.attrs["repeatsperstdv"]
+        self.samplerate = epochgrp.attrs["samplerate"]
+        self.startstdv = epochgrp.attrs["startstdv"]
+        self.stdvmultiples = epochgrp.attrs["stdvmultiples"]
+        self.stdvmultiplier = epochgrp.attrs["stdvmultiplier"]
+        self.stimtime = int(epochgrp.attrs["stimtime"]*10)
+        self.tailtime = int(epochgrp.attrs["tailtime"]*10)
+        self.userandomseed = epochgrp.attrs["userandomseed"]
+        self.ndf = epochgrp.attrs["ndf"]
+        self.seed = epochgrp.attrs["seed"]
+        self.stdv = epochgrp.attrs["stdv"]
 
     @property
     def type(self):
         return "noisepoch"
+
+    @property
+    def trace(self):
+        return self._response_ds[:] - np.mean(self._response_ds[:self.pretime])
 
     @property
     def stimulus(self):

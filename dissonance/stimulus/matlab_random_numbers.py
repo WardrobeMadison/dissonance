@@ -1,14 +1,16 @@
 import os
-os.environ["LD_LIBRARY_PATH"]="/usr/local/MATLAB/MATLAB_Runtime/R2023a/runtime/glnxa64:/usr/local/MATLAB/MATLAB_Runtime/R2023a/bin/glnxa64:/usr/local/MATLAB/MATLAB_Runtime/R2023a/sys/os/glnxa64:/usr/local/MATLAB/MATLAB_Runtime/R2023a/extern/bin/glnxa64:/usr/local/MATLAB/MATLAB_Runtime/R2023a/sys/opengl/lib/glnxa64"
+#matlabroot = "/usr/local/MATLAB/MATLAB_Runtime/R2023a/"
+#os.environ["LD_LIBRARY_PATH"]=f"{matlabroot}/bin/glnxa64:{matlabroot}/sys/os/glnxa64:LD_LIBRARY_PATH"
+os.environ["LD_LIBRARY_PATH"]="/usr/local/MATLAB/MATLAB_Runtime/R2023a/runtime/glnxa64:/usr/local/MATLAB/MATLAB_Runtime/R2023a/bin/glnxa64:/usr/local/MATLAB/MATLAB_Runtime/R2023a/sys/os/glnxa64:/usr/local/MATLAB/MATLAB_Runtime/R2023a/extern/bin/glnxa64:/usr/local/MATLAB/MATLAB_Runtime/R2023a/sys/opengl/lib/glnxa64:$LD_LIBRARAY_PATH"
 
 import numpy as np
-import standardNormal
+from standardNormal import standardNormal
 import matlab
 
 
 class MatlabRNorm:
     def __init__(self):
-        self.sn = standardNormal.initialize()
+        ...
 
     def sample(self, seed, m:int, n:int) -> np.ndarray:
         seed = matlab.int32([seed], size=(1, 1))

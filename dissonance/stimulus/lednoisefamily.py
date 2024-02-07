@@ -1,6 +1,9 @@
 # https://github.com/sinha-lab-org/SymphonyAnalysis/blob/361cab9c7bd90b33317b0e63ad87aeeca210a6fd/core/%2Bstimuli/%2Bgenerators/GaussianNoiseGeneratorV2.m
-from .stimulus_generator import StimulusGenerator
 import numpy as np
+from .stimulus_generator import StimulusGenerator
+import matplotlib.pyplot as plt
+import numpy as np
+from dissonance.epochtypes.noiseepoch import NoiseEpoch
 from scipy.fftpack import fft, ifft
 
 from .matlab_random_numbers import MatlabRNorm
@@ -40,14 +43,34 @@ class LedNoiseStimulusGenerator(StimulusGenerator):
     def __len__(self):
         return self.preTime + self.stimTime + self.tailTime
 
-    def generate(self) -> np.ndarray:
-        def timetopts(t): return (round(t / 1e3 * self.samplerate))
-        prepts = timetopts(self.pretime)
-        stimpts = timetopts(self.stimtime)
-        tailpts = timetopts(self.tailtime)
+    @classmethod
+    def from_epoch(cls, epoch: NoiseEpoch):
+        return LedNoiseStimulusGenerator(
+            freqcutoff= epoch.frequencycutoff,
+            inverted=epoch.stimparams["inverted"],
+            mean= epoch.lightmean,
+            samplerate= epoch.samplerate,
+            stdev= epoch.stdv,
+            pre_time= epoch.pretime,
+            stim_time= epoch.stimtime,
+            tail_time= epoch.tailtime,
+            units= epoch.stimparams["units"] == "_normalized_",
+            seed= epoch.seed,
+            numfilters= epoch.numberoffilters,
+            upperlimit= epoch.stimparams["upperlimit"],
+            lowerlimit= epoch.stimparams["lowerlimit"],
+        )
+
+    def generate(self, rnorm = None) -> np.ndarray:
+        prepts = self.pretime
+        stimpts = self.stimtime
+        tailpts = self.tailtime
 
         # % Initialize random number generator.
-        with MatlabRNorm() as rnorm:
+        if rnorm is None:
+            with MatlabRNorm() as rnorm:
+                noisetime = self.stdev * rnorm.sample(int(self.seed), 1, stimpts)
+        else:
             noisetime = self.stdev * rnorm.sample(int(self.seed), 1, stimpts)
 
         # % To frequency domain.
@@ -102,3 +125,16 @@ class LedNoiseStimulusGenerator(StimulusGenerator):
         data = np.clip(data, self.lowerlimit, self.upperlimit)
 
         return data
+
+def plot_stimulus(Y, seed):
+    X = np.arange(Y.shape[0]) / 1e4
+
+    std = np.std(Y)
+    mean = np.mean(Y)
+
+    fig, ax = plt.subplots()
+    ax.plot(X, Y, c="purple", alpha=0.35)
+    ax.set_title(f"N({mean:.2f}, {std:2f}) with seed={seed}")
+    fig.show()
+    return fig
+

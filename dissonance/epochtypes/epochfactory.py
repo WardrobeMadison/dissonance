@@ -11,7 +11,15 @@ from .ledpairedpulsefamily import LedPairedPulseFamilyEpoch
 from .adaptingsteps import AdaptingStepsEpoch
 from .ledpairedsinewavepulse import LedPairedSineWavePulseEpoch
 
-EpochType = SpikeEpoch | WholeEpoch | NoiseEpoch | SaccadeEpoch | ChirpEpoch | LedPairedPulseFamilyEpoch | AdaptingStepsEpoch
+EpochType = (
+    SpikeEpoch
+    | WholeEpoch
+    | NoiseEpoch
+    | SaccadeEpoch
+    | ChirpEpoch
+    | LedPairedPulseFamilyEpoch
+    | AdaptingStepsEpoch
+)
 
 
 def epoch_factory(epochgrp: h5py.Group) -> EpochType:

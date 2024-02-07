@@ -26,13 +26,11 @@ RAW_DIR = Path("/home/joe/Projects/datastore/sinhalab/experiments")
 def get_files(folders, root: Path = MAPPED_DIR):
     paths = []
     for fldr in folders:
-        paths.extend(
-            [file for ii, file in enumerate((root/fldr).glob("*.h5"))])
+        paths.extend([file for ii, file in enumerate((root / fldr).glob("*.h5"))])
     return paths
 
 
 class DissonanceReader:
-
     def __init__(self, paths: List[Path]):
         self.experimentpaths = []
         for path in paths:
@@ -54,14 +52,13 @@ class DissonanceReader:
                 paramnames = [*paramnames, "startdate"]
 
             data = []
-            h5file = h5py.File(str(filepath), "a")
+            h5file = h5py.File(str(filepath), "r")
             experiment = h5file["experiment"]
             for epochname in experiment:
                 epoch = experiment[epochname]
 
                 if filters is not None:
-                    condition = all(
-                        [epoch.attrs.get(key) == val for key, val in filters.items()])
+                    condition = all([epoch.attrs.get(key) == val for key, val in filters.items()])
                 else:
                     condition = True
                 if condition:
@@ -92,10 +89,11 @@ class DissonanceReader:
             traces.extend(self.h5_to_epochs(filepath, **kwargs))
         return traces
 
-    def to_params(self, paramnames: List[str], filters: Dict = None, nprocesses: int = 5) -> pd.DataFrame:
+    def to_params(
+        self, paramnames: List[str], filters: Dict = None, nprocesses: int = 5
+    ) -> pd.DataFrame:
         dfs = []
-        func = partial(self.file_to_paramstable,
-                       paramnames=paramnames, filters=filters)
+        func = partial(self.file_to_paramstable, paramnames=paramnames, filters=filters)
 
         if nprocesses == 1:
             for experimentpath in self.experimentpaths:
@@ -108,28 +106,35 @@ class DissonanceReader:
 
         return pd.concat(dfs)
 
-    def to_epoch_io(self, paramnames: List[str], filters=None, filterpath: Path = None, protocols=None, nprocesses: int = 5):
+    def to_epoch_io(
+        self,
+        paramnames: List[str],
+        filters=None,
+        filterpath: Path = None,
+        protocols=None,
+        nprocesses: int = 5,
+    ):
         params = self.to_params(paramnames, filters, nprocesses)
 
         if protocols is not None:
-            params = params.loc[
-                (params.protocolname.isin(protocols))]
+            params = params.loc[(params.protocolname.isin(protocols))]
 
         if filterpath is not None:
-            startdates_to_exclude = set(pd.read_csv(
-                filterpath, parse_dates=["startdate"]).iloc[:, 0].values)
+            startdates_to_exclude = set(
+                pd.read_csv(filterpath, parse_dates=["startdate"]).iloc[:, 0].values
+            )
         else:
             startdates_to_exclude = None
 
         epochio = EpochIO(params, self.experimentpaths, startdates_to_exclude)
         return epochio
 
-    def to_epoch_table(self, paramnames: List[str], filters=None, filterpath: Path = None, nprocesses: int = 5) -> pd.DataFrame:
+    def to_epoch_table(
+        self, paramnames: List[str], filters=None, filterpath: Path = None, nprocesses: int = 5
+    ) -> pd.DataFrame:
         eio = self.to_epoch_io(
-            paramnames=paramnames,
-            filters=filters,
-            filterpath=filterpath,
-            nprocesses=nprocesses)
+            paramnames=paramnames, filters=filters, filterpath=filterpath, nprocesses=nprocesses
+        )
         return eio.query(None)
 
 
@@ -169,9 +174,7 @@ class DissonanceUpdater:
 
         for name in f["experiment"]:
             epoch = f[f"experiment/{name}"]
-            if all([
-                    epoch.attrs[key] == val
-                    for key, val in filters.items()]):
+            if all([epoch.attrs[key] == val for key, val in filters.items()]):
                 epoch.attrs[paramname] = paramval
 
         f.close()
@@ -180,7 +183,6 @@ class DissonanceUpdater:
         f = h5py.File(self.filepath, "r+")
 
         for name in f["experiment"]:
-
             epoch = f[f"experiment/{name}"]
             del epoch.attrs["genotype"]
             epoch.attrs["genotype"] = genotype
@@ -189,7 +191,6 @@ class DissonanceUpdater:
 
 
 class EpochIO:
-
     def __init__(self, params: pd.DataFrame, experimentpaths: List[Path], unchecked: set = None):
         self.files = dict()
         try:
@@ -222,8 +223,7 @@ class EpochIO:
             # updatedfiles.add(row["epoch"].)
             # UPDATE EPOCHIO DATATABLE PARAMETERS
             if paramname in self.frame.columns:
-                self.frame.loc[self.frame.startdate ==
-                               row["startdate"], paramname] = value
+                self.frame.loc[self.frame.startdate == row["startdate"], paramname] = value
 
         updatedfiles = eframe.exppath.unique()
 
@@ -255,8 +255,7 @@ class EpochIO:
                 if "Name" in filter.keys():
                     del filter["Name"]
                 if len(filter) == 1 and list(filter.keys())[0] == "startdate":
-                    dfs.append(self.frame.query(
-                        f"startdate == '{filter['startdate']}'"))
+                    dfs.append(self.frame.query(f"startdate == '{filter['startdate']}'"))
                 else:
                     # DICTIONARY OF ALL VALUES
                     # BUILD FILTER CONDITION
@@ -264,13 +263,9 @@ class EpochIO:
                     condition = []
                     for key, value in filter.items():
                         if value is None:
-                            condition.append(
-                                self.frame[key].apply(lambda x: x is None)
-                            )
+                            condition.append(self.frame[key].apply(lambda x: x is None))
                         else:
-                            condition.append(
-                                self.frame[key] == value
-                            )
+                            condition.append(self.frame[key] == value)
                     dff = self.frame.loc[reduce(operator.and_, condition), :]
 
                     # FILTER FOR CHECKED VALUES
@@ -282,16 +277,17 @@ class EpochIO:
 
         # CONVERT TO EPOCHS IN DATAFRAME
         if len(dfs) == 0:
-            #raise Exception("No epochs returns")
+            # raise Exception("No epochs returns")
             print("No epochs returns")
         else:
-            df = (pd.concat(dfs))
+            df = pd.concat(dfs)
             df = df.reset_index(drop=True)
             df = df.drop_duplicates(keep="first")
             # HACK why are there NAs here?
             df = df[~df.isna()]
 
         if df.shape[0] != 0:
+
             def func(row):
                 try:
                     return epoch_factory(self.files[row.exppath][f"epoch{row.number}"])
@@ -299,12 +295,10 @@ class EpochIO:
                     print(row.exppath)
                     return None
 
-            df["epoch"] = df.apply(lambda x:
-                                   func(x),
-                                   axis=1)
+            df["epoch"] = df.apply(lambda x: func(x), axis=1)
             df = df[~df["epoch"].isnull()]
         else:
-            #raise Exception("No epochs returns")
+            # raise Exception("No epochs returns")
             print("No epochs returns")
 
         return df
@@ -321,8 +315,10 @@ def read_light_info_from_log(path: Path) -> pd.DataFrame:
             lightamp, lightmean = records[-2:]
             lights.add((float(lightamp), float(lightmean)))
 
-    df = pd.DataFrame(
-        columns="Amplitude Mean".split(),
-        data=lights).sort_values("Amplitude").reset_index(drop=True)
+    df = (
+        pd.DataFrame(columns="Amplitude Mean".split(), data=lights)
+        .sort_values("Amplitude")
+        .reset_index(drop=True)
+    )
 
     return df
