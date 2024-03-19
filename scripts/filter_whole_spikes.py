@@ -38,5 +38,5 @@ def filter_spikes(signal, samplerate, cutoff_cycles_per_second, plt_process=Fals
     return cut_signal
 
 
-signal = np.genfromtxt("/home/joe/Downloads/tojoe.txt")
+signal = np.genfromtxt("~/Downloads/tojoe.txt")
 cut_signal = filter_spikes(signal, 10000, 100, True)

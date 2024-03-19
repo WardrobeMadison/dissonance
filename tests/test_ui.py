@@ -21,7 +21,7 @@ class Params:
 Saccade = Params(
     name="Saccade",
     filter_path=Path(
-        "/home/joe/Projects/analysis/filters/saccade/GG2_saccade.txt"),
+        "~/Projects/analysis/filters/saccade/GG2_saccade.txt"),
     protocols=["SaccadeTrajectory2"],
     paramnames=["led", "protocolname", "celltype",
                 "genotype", "cellname", "lightmean", "startdate"],
@@ -31,9 +31,9 @@ Saccade = Params(
 AdaptingSteps = Params(
     name="AdaptingSteps",
     filter_path=Path(
-        "/home/joe/Projects/analysis/filters/adaptingsteps/adapting_steps_5000.txt"),
+        "~/Projects/analysis/filters/adaptingsteps/adapting_steps_5000.txt"),
     #filter_path=Path(
-    #"/home/joe/Projects/analysis/filters/adaptingsteps/adapting_steps_8000.txt"),
+    #"~/Projects/analysis/filters/adaptingsteps/adapting_steps_8000.txt"),
     protocols=["AdaptingSteps"],
     paramnames=["led", "protocolname", "celltype",
                 "genotype", "step_magnitude", "cellname", "startdate","variable_flash_time"],
@@ -43,7 +43,7 @@ AdaptingSteps = Params(
 ContrastResponse = Params(
     name="ContrastResponse",
     filter_path=Path(
-        "/home/joe/Projects/analysis/filters/contrastresponse/GG2_5000_CRF.txt"),
+        "~/Projects/analysis/filters/contrastresponse/GG2_5000_CRF.txt"),
     protocols=["LedPulse"],
     paramnames=["led", "protocolname", "celltype", "genotype", "cellname",
                 "lightmean", "lightamplitude", "tracetype", "startdate", "holdingpotential"],
@@ -54,7 +54,7 @@ ContrastResponse = Params(
 LedPulseOFFTRodSpikes = Params(
     name="LedPulseOFFTRodSpikes",
     filter_path=Path(
-        "/home/joe/Projects/analysis/filters/GG2OFFTledpulsespikes/GG2OFFTledpulsespikes.txt"),
+        "~/Projects/analysis/filters/GG2OFFTledpulsespikes/GG2OFFTledpulsespikes.txt"),
     protocols=["LedPulse"],
     paramnames=["led", "protocolname", "celltype", "genotype", "cellname",
                 "lightmean", "lightamplitude", "tracetype", "startdate", "holdingpotential"],
@@ -65,7 +65,7 @@ LedPulseOFFTRodSpikes = Params(
 GA1Spikes = Params(
     name="GA1Spikes",
     filter_path=Path(
-        "/home/joe/Projects/analysis/filters/GA1ledpulsespikes/temp_from_other.txt"),
+        "~/Projects/analysis/filters/GA1ledpulsespikes/temp_from_other.txt"),
     protocols=["LedPulse"],
     paramnames=["led", "protocolname", "celltype", "genotype", "cellname",
                 "lightmean", "lightamplitude", "tracetype", "startdate", "holdingpotential"],
@@ -76,7 +76,7 @@ GA1Spikes = Params(
 GA1SpikesFamily = Params(
     name="GA1SpikesFamily",
     filter_path=Path(
-        "/home/joe/Projects/analysis/filters/GA1ledpulsefamilyspikes/GA1LedPulseFamilySpikes.txt"),
+        "~/Projects/analysis/filters/GA1ledpulsefamilyspikes/GA1LedPulseFamilySpikes.txt"),
     protocols=["LedPulseFamily"],
     paramnames=["led", "protocolname", "celltype", "genotype", "cellname",
                 "lightmean", "lightamplitude", "tracetype", "startdate", "holdingpotential"],
@@ -87,7 +87,7 @@ GA1SpikesFamily = Params(
 GA1Excitation = Params(
     name="GA1Excitation",
     filter_path=Path(
-        "/home/joe/Projects/analysis/filters/GA1ledpulseexcitation/GA1_bothLED_nobadepochsUNFINISHED.txt"), #rod and cone
+        "~/Projects/analysis/filters/GA1ledpulseexcitation/GA1_bothLED_nobadepochsUNFINISHED.txt"), #rod and cone
     protocols=["LedPulse"],
     paramnames=["led", "protocolname", "celltype", "genotype", "cellname",
                 "lightmean", "lightamplitude", "tracetype", "startdate", "holdingpotential"],
@@ -98,7 +98,7 @@ GA1Excitation = Params(
 GA1ExcitationFamily = Params(
     name="GA1ExcitationFamily",
     filter_path=Path(
-        "/home/joe/Projects/analysis/filters/GA1ledpulsefamilyexcitation/GA1ledpulsefamilyexcitation.txt"), #rod and cone
+        "~/Projects/analysis/filters/GA1ledpulsefamilyexcitation/GA1ledpulsefamilyexcitation.txt"), #rod and cone
     protocols=["LedPulseFamily"],
     paramnames=["led", "protocolname", "celltype", "genotype", "cellname",
                 "lightmean", "lightamplitude", "tracetype", "startdate", "holdingpotential"],
@@ -109,8 +109,8 @@ GA1ExcitationFamily = Params(
 LedPulseOFFSRodSpikes = Params(
     name="LedPulseOFFSRodSpikes",
     filter_path=Path(
-        #"/home/joe/Projects/analysis/filters/GG2OFFSledpulsespikes/GG2OFFSledpulsespikes.txt"),
-        "/home/joe/Projects/analysis/filters/GG2OFFSledpulsespikes/filtered_for_pretty_avg_PSTHs_GG2OFFSledpulsespikes.txt"),
+        #"~/Projects/analysis/filters/GG2OFFSledpulsespikes/GG2OFFSledpulsespikes.txt"),
+        "~/Projects/analysis/filters/GG2OFFSledpulsespikes/filtered_for_pretty_avg_PSTHs_GG2OFFSledpulsespikes.txt"),
     protocols=["LedPulse"],
     paramnames=["led", "protocolname", "celltype", "genotype", "cellname",
                 "lightmean", "lightamplitude", "tracetype", "startdate", "holdingpotential"],
@@ -121,7 +121,7 @@ LedPulseOFFSRodSpikes = Params(
 Inhibition = Params(
     name="Inhibition",
     filter_path=Path(
-        "/home/joe/Projects/analysis/filters/GG2OFFTledpulseinhibition/arvo.txt"),
+        "~/Projects/analysis/filters/GG2OFFTledpulseinhibition/arvo.txt"),
     protocols=["LedPulse"],
     paramnames=["led", "protocolname", "celltype", "genotype", "cellname",
                 "lightmean", "lightamplitude", "tracetype", "startdate", "holdingpotential"],
@@ -131,7 +131,7 @@ Inhibition = Params(
 PairedPulse = Params(
     name="PairedPulse",
     filter_path=Path(
-        "/home/joe/Projects/analysis/filters/ledpairedpulse/1000r*LedPairPulseFilters.txt"),
+        "~/Projects/analysis/filters/ledpairedpulse/1000rstarLedPairPulseFilters.txt"),
     protocols=["LedPairedPulseFamily", "LedPairedPulseFamilyOriginal"],
     paramnames=["led", "celltype", "genotype", "cellname", "tracetype", "backgroundval",
                 "lightamplitude", "lightmean", "protocolname", "intime2", "startdate", "holdingpotential"],
@@ -141,7 +141,7 @@ PairedPulse = Params(
 ExpandingSpots = Params(
     name="ExpandingSpots",
     filter_path=Path(
-        "/home/joe/Projects/analysis/filters/expandingspots/expandingspots.txt"),
+        "~/Projects/analysis/filters/expandingspots/expandingspots.txt"),
     protocols=["ExpandingSpots"],
     paramnames=["protocolname", "celltype", "cellname", "genotype", "startdate",
                 "tracetype", "current_spot_size", "background_intensity", "spot_intensity"],
@@ -152,7 +152,7 @@ ExpandingSpots = Params(
 Weber = Params(
     name="Weber",
     filter_path=Path(
-        "/home/joe/Projects/analysis/filters/weber/gg2_Weber.txt"),
+        "~/Projects/analysis/filters/weber/gg2_Weber.txt"),
     protocols=["LedPulseFamily"],
     paramnames=["led", "protocolname", "celltype", "genotype", "cellname",
                 "lightmean", "lightamplitude", "tracetype", "startdate", "holdingpotential"],
@@ -162,7 +162,7 @@ Weber = Params(
 SineWavePulse = Params(
     name="SineWavePulse",
     filter_path=Path(
-        "/home/joe/Projects/analysis/filters/ledpairedpulse/1000r*LedPairPulseFilters.txt"),
+        "~/Projects/analysis/filters/ledpairedpulse/1000rstarLedPairPulseFilters.txt"),
     protocols=["LedPairedSineWavePulse"],
     paramnames=["led", "celltype", "genotype", "cellname", "tracetype", "backgroundval",
                 "lightamplitude", "lightmean", "protocolname", "first_wave_contrast","second_wave_contrast",

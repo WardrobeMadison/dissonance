@@ -1095,8 +1095,8 @@ class PlotCellWeber(PlotBase):
         self.lightmean = 0.0
 
         self.ax.set_title("Weber Adaptation")
-        self.ax.set_ylabel("Gain (1/R*)")
-        self.ax.set_xlabel("Background (R*/S-cone/sec)")
+        self.ax.set_ylabel("Gain (1/rstar)")
+        self.ax.set_xlabel("Background (rstar/S-cone/sec)")
 
         if eframe is not None:
             self.append_trace(eframe)
@@ -1248,8 +1248,8 @@ class PlotWeber(PlotBase):
         self.gains = dict()
         self.tY = defaultdict(list)
 
-        self.ax.set_ylabel("Gain (1/R*)")
-        self.ax.set_xlabel("Background (R*/S-cone/sec)")
+        self.ax.set_ylabel("Gain (1/rstar)")
+        self.ax.set_xlabel("Background (rstar/S-cone/sec)")
 
         if eframe is not None:
             self.append_trace(eframe)

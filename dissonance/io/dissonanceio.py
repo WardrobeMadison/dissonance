@@ -18,9 +18,9 @@ logger = logging.getLogger(__name__)
 RE_DATE = re.compile(r"^.*(\d{4}-\d{2}-\d{2})(\w\d?).*$")
 
 
-ROOT_DIR = Path("/home/joe/Projects/datastore")
-MAPPED_DIR = Path("/home/joe/Projects/datastore/dissonance")
-RAW_DIR = Path("/home/joe/Projects/datastore/sinhalab/experiments")
+ROOT_DIR = Path.home() / "Projects/datastore"
+MAPPED_DIR = Path.home() / "Projects/datastore/dissonance"
+RAW_DIR = Path.home() / "Projects/datastore/sinhalab/experiments"
 
 
 def get_files(folders, root: Path = MAPPED_DIR):

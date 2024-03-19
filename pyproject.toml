@@ -20,6 +20,8 @@ pyqt5 = "=5.15.10"
 pyqt5-qt5 = "=5.15.2"
 h5py = "^3.10.0"
 tables = "^3.9.2"
+click = "^8.1.7"
+pytest = "^8.1.1"
 
 [build-system]
 requires = ["poetry-core"]

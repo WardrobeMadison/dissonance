@@ -30,7 +30,7 @@ def delete_procotols(rdir:Path, protocolname:str):
                     file.flush()
 
 if __name__ == "__main__":
-    rdir = Path(r"/home/joe/Projects/datastore/dissonance/GG2 control")
+    rdir = Path(r"~/Projects/datastore/dissonance/GG2 control")
     for protocolname in ("LedPairedSquareWavePulse","LedPairedSineWavePulse"):
         delete_procotols(
             rdir,
