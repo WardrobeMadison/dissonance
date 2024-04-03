@@ -46,7 +46,14 @@ QTreeView::branch:open:has-children:has-siblings  {
 
 class DissonanceUI(QWidget):
 
-    def __init__(self, epochio: EpochIO, analysis: IAnalysis, unchecked: set = None, uncheckedpath: Path = None, export_dir: Path = None):
+    def __init__(
+        self,
+        epochio: EpochIO,
+        analysis: IAnalysis,
+        unchecked: set = None,
+        uncheckedpath: Path = None,
+        export_dir: Path = None,
+    ):
         super().__init__()
 
         self.unchecked = unchecked
@@ -65,8 +72,7 @@ class DissonanceUI(QWidget):
         savebttn = QPushButton("Save filters", self)
         savebttn.clicked.connect(self.on_save_bttn_click)
 
-        self.treeWidget = EpochTreeWidget(
-            str(analysis), analysis.labels, epochio)
+        self.treeWidget = EpochTreeWidget(str(analysis), analysis.labels, epochio)
         treesplitlabel = QLabel(", ".join(self.treeWidget.tree.labels), self)
         # LABEL FOR CURRENT FILE BEING USED TO STORE STARTDATES OF UNCHECK EPOCHS
         self.filterfilelabel = QLabel(str(self.uncheckedpath))
@@ -99,7 +105,7 @@ class DissonanceUI(QWidget):
         col1.addLayout(hbox)
         col1.addWidget(self.scroll_area)
 
-        #canvas = MplCanvas(self.scroll_area)
+        # canvas = MplCanvas(self.scroll_area)
         self.graphWidget = GraphWidget(self.scroll_area, analysis)
         self.toolbar = NavigationToolbar(self.graphWidget, self)
 
@@ -112,18 +118,16 @@ class DissonanceUI(QWidget):
         self.scroll_area.setWidget(self.graphWidget)
 
         # STAGE EXPORT DIALOG
-        self.dialog = ExportDataWindow(
-            parent=self, charts=None, outputdir=self.export_dir)
+        self.dialog = ExportDataWindow(parent=self, charts=None, outputdir=self.export_dir)
 
         self.initConnections()
 
-
         # SHOW LOGGING WINDOW
-        #self.logger = LoggerDialog(self)
+        # self.logger = LoggerDialog(self)
         # self.logger.show()
         # self.logger.exec_()
 
-# region WIDGETS*****************************************************************
+    # region WIDGETS*****************************************************************
     def initParamsTable(self):
         # EPOCH TRACE INFORMATION TABLE
         self.paramstable = ParamsTable()
@@ -136,7 +140,7 @@ class DissonanceUI(QWidget):
         self.exportdata_bttn.clicked.connect(self.on_export_bttn_click)
 
         # PLOT ON A SEPARATE THREAD
-        #thread = QThread(self)
+        # thread = QThread(self)
         # self.graphWidget.moveToThread(thread)
         # thread.start()
 
@@ -144,9 +148,10 @@ class DissonanceUI(QWidget):
         self.treeWidget.newSelectionForPlot.connect(self.graphWidget.plot)
         self.graphWidget.redrawCanvas.connect(self.redrawCanvas)
         self.graphWidget.currentPlots.connect(self.dialog.fillList)
-# endregion
 
-# region SLOTS*******************************************************************
+    # endregion
+
+    # region SLOTS*******************************************************************
     @pyqtSlot()
     def redrawCanvas(self):
         self.graphWidget.draw()
@@ -165,20 +170,22 @@ class DissonanceUI(QWidget):
         options = QFileDialog.Options()
         options |= QFileDialog.DontUseNativeDialog
         fileName, _ = QFileDialog.getSaveFileName(
-            self, "QFileDialog.getSaveFileName()", "", "All Files (*);;Text Files (*.txt)", options=options)
+            self, "QFileDialog.getSaveFileName()", "", "All Files (*);;Text Files (*.txt)", options=options
+        )
         self.uncheckedpath = fileName
         self.filterfilelabel.setText(self.uncheckedpath)
 
         frame = self.treeWidget.epochio.frame
         if fileName:
-            (frame.loc[~frame.include, "startdate"].to_csv(
-                fileName, index=False))
+            (frame.loc[~frame.include, "startdate"].to_csv(fileName, index=False))
 
     @pyqtSlot()
     def on_export_bttn_click(self):
         self.exportdata_bttn.setEnabled(False)
         self.dialog.show()
         self.dialog.exec_()
+
+
 # endregion
 
 

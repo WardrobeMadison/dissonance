@@ -1,12 +1,10 @@
-from dissonance.io.symphony.utils import convert_if_bytes
-
+import re
+from typing import Dict, Iterator
 
 import h5py
 import numpy as np
 
-
-import re
-from typing import Dict, Iterator
+from dissonance.io.symphony.utils import convert_if_bytes
 
 
 class Response:
@@ -16,12 +14,11 @@ class Response:
     def __init__(self, group: h5py.Group):
         self.group = group
         self.h5name = group.name
-        self.name = self.re_name.match(
-            group.name.split("/")[-1])[1]
+        self.name = self.re_name.match(group.name.split("/")[-1])[1]
 
         self._parameters: Dict = {
             "samplerate": self.group.attrs["sampleRate"],
-            "samplerateunits": self.group.attrs["sampleRateUnits"]
+            "samplerateunits": self.group.attrs["sampleRateUnits"],
         }
 
     def __str__(self):
@@ -32,9 +29,8 @@ class Response:
 
     @property
     def data(self):
-        vals = np.array(self.group["data"][:], dtype=[
-                        ('v', '<f8'), ('units', '<U16')])
-        return vals['v']
+        vals = np.array(self.group["data"][:], dtype=[("v", "<f8"), ("units", "<U16")])
+        return vals["v"]
 
     @property
     def parameters(self) -> Dict:

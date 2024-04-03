@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "dissonance"
-version = "0.1.0"
+version = "0.1.5"
 description = ""
 authors = ["Joe Farchione"]
 readme = "README.md"
@@ -16,14 +16,16 @@ jupyter = "^1.0.0"
 ipykernel = "^6.29.3"
 plotly = "^5.20.0"
 matplotlib = "^3.8.3"
-pyqt5 = "=5.15.10"   
+pyqt5 = "=5.15.10"
 pyqt5-qt5 = "=5.15.2"
 h5py = "^3.10.0"
 tables = "^3.9.2"
 click = "^8.1.7"
 pytest = "^8.1.1"
+multiprocess = "^0.70.16"
+black = "^24.3.0"
+isort = "^5.13.2"
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
-

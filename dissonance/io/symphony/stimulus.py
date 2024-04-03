@@ -1,7 +1,9 @@
-from dissonance.io.symphony.utils import convert_if_bytes
-import h5py
 import re
 from typing import Iterator
+
+import h5py
+
+from dissonance.io.symphony.utils import convert_if_bytes
 
 
 class Stimulus:
@@ -11,8 +13,7 @@ class Stimulus:
     def __init__(self, group: h5py.Group):
         self.group = group
         self.h5name = group.name
-        self.name = self.re_name.match(
-            self.group.name.split("/")[-1])[1]
+        self.name = self.re_name.match(self.group.name.split("/")[-1])[1]
 
         self._parameters = self.group["parameters"].attrs
 

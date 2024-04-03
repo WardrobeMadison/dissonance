@@ -1,8 +1,9 @@
-from dissonance.io import EpochIO
 from PyQt5.Qt import QAbstractItemView, QStandardItem, QStandardItemModel, Qt
 from PyQt5.QtCore import pyqtSignal, pyqtSlot
 from PyQt5.QtGui import QColor, QFont
 from PyQt5.QtWidgets import QTreeView
+
+from dissonance.io import EpochIO
 
 from ..analysis.trees.base import Node
 
@@ -32,8 +33,8 @@ class GroupItem(QStandardItem):
         fnt.setBold(True)
         fnt.setPixelSize(12)
 
-        #self.label = ", ".join(map(str, self.node.path.values()))
-        #self.label = list(self.node.path.values())[-1]
+        # self.label = ", ".join(map(str, self.node.path.values()))
+        # self.label = list(self.node.path.values())[-1]
         self.label = f"{node.label}={node.uid}"
 
         self.setEditable(False)
@@ -41,8 +42,7 @@ class GroupItem(QStandardItem):
         self.setFont(fnt)
         self.setText(self.label)
 
-        self.setFlags(self.flags() 
-            | Qt.ItemIsSelectable | Qt.ItemIsAutoTristate | Qt.ItemIsUserCheckable)
+        self.setFlags(self.flags() | Qt.ItemIsSelectable | Qt.ItemIsAutoTristate | Qt.ItemIsUserCheckable)
         self.setCheckState(Qt.Checked)
 
     @property
@@ -71,8 +71,7 @@ class EpochItem(QStandardItem):
         self.setFont(fnt)
         self.setText(f"startdate={self.label}")
 
-        self.setFlags(self.flags() | Qt.ItemIsUserCheckable |
-                      Qt.ItemIsSelectable)
+        self.setFlags(self.flags() | Qt.ItemIsUserCheckable | Qt.ItemIsSelectable)
         self.setCheckState(Qt.Checked)
 
     @property
@@ -84,6 +83,7 @@ class EpochItem(QStandardItem):
             self.setBackground(QColor(187, 177, 189))
         else:
             self.setBackground(QColor(255, 255, 255, 0))
+
 
 class EpochTreeWidget(QTreeView):
 
@@ -124,8 +124,8 @@ class EpochTreeWidget(QTreeView):
     @pyqtSlot(str, object)
     def updateTree(self, paramname, value):
         self.epochio.update(
-            filters=[node.path for node in self.selectedNodes],
-            paramname=paramname, value=value)
+            filters=[node.path for node in self.selectedNodes], paramname=paramname, value=value
+        )
 
         # REFRESH AND REATTATCH TREE
         self.plantTree(self.epochio)
@@ -141,10 +141,8 @@ class EpochTreeWidget(QTreeView):
         include = item.checkState() == Qt.Checked
 
         if item.isLeaf:
-            self.epochio.frame.loc[
-                self.epochio.frame.startdate == item.label,
-                "include"] = include
-        else: 
+            self.epochio.frame.loc[self.epochio.frame.startdate == item.label, "include"] = include
+        else:
             self.recursiveCheckToggle(item)
             print("figure this out")
 
@@ -153,7 +151,7 @@ class EpochTreeWidget(QTreeView):
         checkState = item.checkState()
         nrows = item.rowCount()
         ncols = item.columnCount()
-        
+
         for cc in range(ncols):
             for rr in range(nrows):
                 child = item.child(rr, cc)
@@ -187,8 +185,7 @@ class EpochTreeWidget(QTreeView):
             treeitem = self.model().itemFromIndex(idxs[0])
             nodes.append(treeitem.node)
         else:
-            nodes = [self.model().itemFromIndex(
-                idx).node for idx in idxs]
+            nodes = [self.model().itemFromIndex(idx).node for idx in idxs]
         return nodes
 
     @pyqtSlot()
@@ -200,11 +197,9 @@ class EpochTreeWidget(QTreeView):
             eframe = None
         elif len(nodes) == 1:
             if "startdate" in nodes[0].path.keys():
-                eframe = self.epochio.query(
-                    filters=[node.path for node in nodes], useincludeflag=False)
+                eframe = self.epochio.query(filters=[node.path for node in nodes], useincludeflag=False)
             else:
-                eframe = self.epochio.query(
-                    filters=[node.path for node in nodes])
+                eframe = self.epochio.query(filters=[node.path for node in nodes])
         else:
             eframe = self.epochio.query(filters=[node.path for node in nodes])
 

@@ -2,23 +2,27 @@ import h5py
 
 from dissonance.epochtypes.expandingspots import ExpandingSpotsEpoch
 
-from .spikeepoch import SpikeEpoch
-from .wholeepoch import WholeEpoch
-from .noiseepoch import NoiseEpoch
-from .sacaadeepoch import SaccadeEpoch
+from .adaptingsteps import AdaptingStepsEpoch
 from .chirpepoch import ChirpEpoch
 from .ledpairedpulsefamily import LedPairedPulseFamilyEpoch
-from .adaptingsteps import AdaptingStepsEpoch
 from .ledpairedsinewavepulse import LedPairedSineWavePulseEpoch
+from .ledpulse import LedPulseSpikeEpoch, LedPulseWholeEpoch
+from .ledpulsefamily import LedPulseFamilySpikeEpoch, LedPulseFamilyWholeEpoch
+from .noiseepoch import NoiseEpoch
+from .sacaadeepoch import SaccadeSpikeEpoch, SaccadeWholeEpoch
 
 EpochType = (
-    SpikeEpoch
-    | WholeEpoch
+    LedPulseSpikeEpoch
+    | LedPulseWholeEpoch
+    | LedPulseFamilySpikeEpoch
+    | LedPulseFamilyWholeEpoch
+    | SaccadeSpikeEpoch
+    | SaccadeWholeEpoch
     | NoiseEpoch
-    | SaccadeEpoch
     | ChirpEpoch
     | LedPairedPulseFamilyEpoch
     | AdaptingStepsEpoch
+    | LedPairedSineWavePulseEpoch
 )
 
 
@@ -26,23 +30,42 @@ def epoch_factory(epochgrp: h5py.Group) -> EpochType:
     protocolname = epochgrp.attrs["protocolname"]
     if protocolname == "LedNoiseFamily":
         return NoiseEpoch(epochgrp)
-    elif protocolname == "SaccadeTrajectory2":
-        return SaccadeEpoch(epochgrp)
+
     elif protocolname == "AdaptingSteps":
         return AdaptingStepsEpoch(epochgrp)
+
     elif protocolname in ["LedPairedPulseFamily", "LedPairedPulseFamilyOriginal"]:
         return LedPairedPulseFamilyEpoch(epochgrp)
+
     elif protocolname == "ChirpStimulusLED":
         return ChirpEpoch(epochgrp)
+
     elif protocolname == "ExpandingSpots":
         return ExpandingSpotsEpoch(epochgrp)
-    elif protocolname in ["LedPulse", "LedPulseFamily"]:
+
+    elif protocolname == "SaccadeTrajectory2":
         tracetype = epochgrp.attrs["tracetype"]
         if tracetype == "spiketrace":
-            return SpikeEpoch(epochgrp)
+            return SaccadeSpikeEpoch(epochgrp)
         elif tracetype == "wholetrace":
-            return WholeEpoch(epochgrp)
-    elif protocolname in ("LedPairedSineWavePulse", ):
+            return SaccadeWholeEpoch(epochgrp)
+
+    elif protocolname in "LedPulseFamily":
+        tracetype = epochgrp.attrs["tracetype"]
+        if tracetype == "spiketrace":
+            return LedPulseFamilySpikeEpoch(epochgrp)
+        elif tracetype == "wholetrace":
+            return LedPulseFamilyWholeEpoch(epochgrp)
+
+    elif protocolname == "LedPulse":
+        tracetype = epochgrp.attrs["tracetype"]
+        if tracetype == "spiketrace":
+            return LedPulseSpikeEpoch(epochgrp)
+        elif tracetype == "wholetrace":
+            return LedPulseWholeEpoch(epochgrp)
+
+    elif protocolname in ("LedPairedSineWavePulse",):
         return LedPairedSineWavePulseEpoch(epochgrp)
+
     else:
         raise NotImplementedError(f"Trace type not yet specified for {epochgrp}")

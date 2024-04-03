@@ -1,10 +1,9 @@
-from dissonance.io.symphony.utils import convert_if_bytes
+import re
+from typing import Dict, Iterator
 
 import h5py
 
-
-import re
-from typing import Dict, Iterator
+from dissonance.io.symphony.utils import convert_if_bytes
 
 
 class Background:
@@ -14,8 +13,7 @@ class Background:
     def __init__(self, group: h5py.Group):
         self.group = group
         self.h5name = group.name
-        self.name = self.re_name.match(
-            group.name.split("/")[-1])[1]
+        self.name = self.re_name.match(group.name.split("/")[-1])[1]
 
     def __str__(self):
         return self.name

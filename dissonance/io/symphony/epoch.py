@@ -1,26 +1,23 @@
-from dissonance.io.symphony.background import Background
-from dissonance.io.symphony.response import Response
-from dissonance.io.symphony.stimulus import Stimulus
+import datetime
+import re
 
 import h5py
 
-
-import datetime
-import re
+from dissonance.io.symphony.background import Background
+from dissonance.io.symphony.response import Response
+from dissonance.io.symphony.stimulus import Stimulus
 
 
 class Epoch:
 
     re_responses = re.compile(r"^([\w\d ]+)-.*$")
-    re_protocolname = re.compile(
-        r".*edu\.wisc\.sinhalab\.protocols\.([\w\d ]+)-.*$")
+    re_protocolname = re.compile(r".*edu\.wisc\.sinhalab\.protocols\.([\w\d ]+)-.*$")
 
     def __init__(self, group: h5py.Group):
         self.group = group
         self.h5name = group.name
         self.name = "epoch"
-        self.protocolname = self.re_protocolname.match(
-            self.group.parent.parent.name)[1]
+        self.protocolname = self.re_protocolname.match(self.group.parent.parent.name)[1]
 
         self._backgrounds = dict()
         for name in self.group["backgrounds"]:
@@ -32,7 +29,7 @@ class Epoch:
 
     @property
     def tracetype(self):
-        if self.protocolname in ("ExpandingSpots", ):
+        if self.protocolname in ("ExpandingSpots",):
             return "spiketrace"
         elif "Amp1" in self._backgrounds.keys():
             val = self._backgrounds["Amp1"]["value"]
@@ -67,12 +64,12 @@ class Epoch:
 
     @property
     def startdate(self):
-        dotNetTime = self.group.attrs['startTimeDotNetDateTimeOffsetTicks']
+        dotNetTime = self.group.attrs["startTimeDotNetDateTimeOffsetTicks"]
         return datetime.datetime(1, 1, 1) + datetime.timedelta(microseconds=int(dotNetTime // 10))
 
     @property
     def enddate(self):
-        dotNetTime = self.group.attrs['endTimeDotNetDateTimeOffsetTicks']
+        dotNetTime = self.group.attrs["endTimeDotNetDateTimeOffsetTicks"]
         return datetime.datetime(1, 1, 1) + datetime.timedelta(microseconds=int(dotNetTime // 10))
 
     @property

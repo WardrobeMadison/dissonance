@@ -1,10 +1,11 @@
 from typing import List
-import numpy as np
-from ..analysis_functions.psth import calculate_psth
-from ..analysis_functions import hill
+
 import h5py
+import numpy as np
 from scipy.stats import sem
 
+from ..analysis_functions import hill
+from ..analysis_functions.psth import calculate_psth
 from .baseepoch import EpochBlock, IEpoch
 
 
@@ -34,10 +35,10 @@ class AdaptingStepsEpoch(IEpoch):
         self.variable_post_flash_amp = epochgrp.attrs["variable_post_flash_amp"]
         self.variable_step_flash_amp = epochgrp.attrs["variable_step_flash_amp"]
 
-        #self.stimulus = epochgrp["UV LED"]
+        # self.stimulus = epochgrp["UV LED"]
 
-        #self._stim_steps = defaultdict(dict)
-        #for key, paramval in self.stimulus.attrs.items():
+        # self._stim_steps = defaultdict(dict)
+        # for key, paramval in self.stimulus.attrs.items():
         #    ledname, param = key.splt("_")
         #    self._stim_steps[ledname][param] = paramval
 
@@ -55,8 +56,8 @@ class AdaptingStepsEpoch(IEpoch):
 
     @property
     def peaks(self):
-        firstrace = self.trace[self.step_pre: self.first_window]
-        secondtrace = self.trace[self.first_window: self.second_window]
+        firstrace = self.trace[self.step_pre : self.first_window]
+        secondtrace = self.trace[self.first_window : self.second_window]
 
         firstpeak = np.min(firstrace)
         secondpeak = np.min(secondtrace)
@@ -77,12 +78,10 @@ class AdaptingStepsEpoch(IEpoch):
         return "ApdatingStepTrace"
 
     @property
-    def peaks(self):
-        ...
+    def peaks(self): ...
 
     @property
-    def peaks(self):
-        ...
+    def peaks(self): ...
 
 
 class AdpatingStepsEpochs(EpochBlock):

@@ -1,17 +1,19 @@
-import pandas as pd
+import logging
 from pathlib import Path
 
-import logging
+import pandas as pd
 
 logger = logging.getLogger(__name__)
+
 
 class RStarrConverter:
     """Map symphony units to rstarr conversion. Detector is sensitive on each date, so table is maintained in data."""
 
     def __init__(self, valdate, path=None):
         self.valdate = valdate
-        self.path = Path(__file__).parent.parent.parent.parent / \
-            "data/rstarrmap.txt" if path is None else path
+        self.path = (
+            Path(__file__).parent.parent.parent.parent / "data/rstarrmap.txt" if path is None else path
+        )
         self.df = self.read_rstarr_table(self.path)
         self.map = self.rstarr_map_to_dict(self.df, valdate)
         self.errors = set()
@@ -28,27 +30,25 @@ class RStarrConverter:
                 lightamplitude=float,
                 lightamplitude_rstarr=float,
                 lightmean=float,
-                lightmean_rstarr=float))
+                lightmean_rstarr=float,
+            ),
+        )
         return rstarrdf
 
     def get(self, protocolname, led, lightamp, lightmean) -> tuple[float, float]:
         """Get rstarr mapping. Adds to .errors and sets to -10000, -10000 if not found."""
         key = (protocolname, led, lightamp, lightmean)
-        amp, mean = self.map.get(key, (-10000, -1000))
+        amp, mean = self.map.get(key, (-10_000, -10_000))
 
-        if key is (-10000, -10000):
-            set.add(
-                ','.join(map(str, ((self.valdate, protocolname, led, lightamp, lightmean)))))
-            amp, mean = -10000, -10000
+        if ((amp, mean) == (-10_000, -10_000)) or ((amp, mean) == (-10_000, -1_000)):
+            amp, mean = -10_000, -10_000
             logger.warning(f"{protocolname}: {led, lightamp, lightmean} is not key in the table.")
 
         return amp, mean
 
     def rstarr_map_to_dict(self, df: pd.DataFrame, valdate) -> dict:
         """Convert rstarr table to dictionary based on valuation date"""
-        dff = df.loc[
-            (df.startdate <= valdate) & (df.enddate > valdate)
-        ]
+        dff = df.loc[(df.startdate <= valdate) & (df.enddate > valdate)]
 
         if dff.shape[0] == 0:
             raise Exception(f"{valdate} is not in RStarr map")
@@ -56,5 +56,7 @@ class RStarrConverter:
         rstarrmap = dict()
         for _, row in dff.iterrows():
             rstarrmap[(row["protocolname"], row["led"], row["lightamplitude"], row["lightmean"])] = (
-                row["lightamplitude_rstarr"], row["lightmean_rstarr"])
+                row["lightamplitude_rstarr"],
+                row["lightmean_rstarr"],
+            )
         return rstarrmap

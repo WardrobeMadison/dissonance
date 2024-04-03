@@ -1,10 +1,11 @@
 from typing import List
-import numpy as np
-from ..analysis_functions.psth import calculate_psth
-from ..analysis_functions import hill
+
 import h5py
+import numpy as np
 from scipy.stats import sem
 
+from ..analysis_functions import hill
+from ..analysis_functions.psth import calculate_psth
 from .baseepoch import EpochBlock, IEpoch
 
 
@@ -24,12 +25,13 @@ class LedPairedSineWavePulseEpoch(IEpoch):
     def trace(self):
         vals = self._response_ds[:]
         # baseline subtracted
-        vals = vals - np.mean(vals[:int(self.pretime)])
+        vals = vals - np.mean(vals[: int(self.pretime)])
         return vals
 
     @property
     def type(self) -> str:
         return "LedPairedSineWavePulseTrace"
+
 
 class LedPairedSineWavePulseEpochs(EpochBlock):
 

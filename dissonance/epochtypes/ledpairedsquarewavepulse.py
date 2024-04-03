@@ -1,10 +1,11 @@
 from typing import List
-import numpy as np
-from ..analysis_functions.psth import calculate_psth
-from ..analysis_functions import hill
+
 import h5py
+import numpy as np
 from scipy.stats import sem
 
+from ..analysis_functions import hill
+from ..analysis_functions.psth import calculate_psth
 from .baseepoch import EpochBlock, IEpoch
 
 
@@ -16,7 +17,7 @@ class LedPairedSquareWavePulseEpoch(IEpoch):
         self.first_wave_contrast = epochgrp.attrs["firstWaveContrast"]
         self.first_wave_frequency = epochgrp.attrs["firstWaveFrequency"]
         self.first_wave_time = epochgrp.attrs["firstWaveTime"]
-        self.intime = epochgrp.attrs["inTime"],
+        self.intime = (epochgrp.attrs["inTime"],)
         self.interpulse_interval = epochgrp.attrs["interpulseInterval"]
         self.number_of_averages = epochgrp.attrs["numberOfAverages"]
         self.second_wave_contrast = epochgrp.attrs["secondWaveContrast"]
@@ -31,8 +32,6 @@ class LedPairedSquareWavePulseEpoch(IEpoch):
     @property
     def type(self) -> str:
         return "LedPairedSquareWavePulseTrace"
-
-
 
 
 class LedPairedSquareWavePulseEpochs(EpochBlock):

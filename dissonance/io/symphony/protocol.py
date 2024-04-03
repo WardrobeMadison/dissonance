@@ -1,11 +1,9 @@
-from dissonance.io.symphony.epoch import Epoch
-from dissonance.io.symphony.utils import convert_if_bytes
-
+import re
 
 import h5py
 
-
-import re
+from dissonance.io.symphony.epoch import Epoch
+from dissonance.io.symphony.utils import convert_if_bytes
 
 
 class Protocol:

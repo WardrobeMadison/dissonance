@@ -1,10 +1,11 @@
 from typing import List
+
 import pandas as pd
 
-from ..epochtypes import groupby, IEpoch, EpochBlock
+from ..epochtypes import EpochBlock, IEpoch, groupby
 from .baseanalysis import IAnalysis
-from .charting import (MplCanvas,  PlotPsth, PlotRaster,
-                       PlotTrace, PlotWholeTrace,)
+from .charting import (MplCanvas, PlotPsth, PlotRaster, PlotTrace,
+                       PlotWholeTrace)
 
 
 class BrowsingAnalysis(IAnalysis):
@@ -18,8 +19,7 @@ class BrowsingAnalysis(IAnalysis):
         return type(self).__name__
 
     def plot(self, level: str, eframe: pd.DataFrame, canvas: MplCanvas = None):
-        """Map node level to analysis run & plots created.
-        """
+        """Map node level to analysis run & plots created."""
         self.currentplots = []
         self.canvas = canvas
 
@@ -38,8 +38,7 @@ class BrowsingAnalysis(IAnalysis):
         self.currentplots.append(plttr)
 
     def plot_summary_epochs(self, eframe: pd.DataFrame, canvas: MplCanvas = None):
-        """Plot faceted mean psth
-        """
+        """Plot faceted mean psth"""
 
         if eframe.tracetype.iloc[0] == "spiketrace":
             grps = groupby(eframe, self.labels)
@@ -51,8 +50,7 @@ class BrowsingAnalysis(IAnalysis):
                 cepochs = row["epoch"]
 
                 # FIRST COLUMN
-                pltpsth = PlotPsth(axes[axii], cepochs,
-                                   cepochs.get_unique("cellname")[0])
+                pltpsth = PlotPsth(axes[axii], cepochs, cepochs.get_unique("cellname")[0])
                 axii += 1
 
                 # SECOND COLUMN
@@ -84,14 +82,17 @@ class BrowsingAnalysis(IAnalysis):
                 self.currentplots.extend([pltraster])
 
     @property
-    def name(self): return "Browsing"
+    def name(self):
+        return "Browsing"
 
     @property
     def labels(self) -> List[str]:
         return self._splits
 
     @property
-    def tracestype(self): return EpochBlock
+    def tracestype(self):
+        return EpochBlock
 
     @property
-    def tracetype(self): return IEpoch
+    def tracetype(self):
+        return IEpoch

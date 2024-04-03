@@ -1,1 +1,1 @@
-from .base import Tree, Node
+from .base import Node, Tree

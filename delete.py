@@ -1,7 +1,8 @@
 import numpy as np
 
 from dissonance import io
-from dissonance.analysis_functions.linear_nonlinear_model import LinearNonLinearModel
+from dissonance.analysis_functions.linear_nonlinear_model import \
+    LinearNonLinearModel
 from dissonance.stimulus.matlab_random_numbers import MatlabRNorm
 
 
@@ -25,9 +26,7 @@ def read_spike_data():
         "holdingpotential",
     ]
     dr = io.DissonanceReader.from_folders(folders)
-    ef = dr.to_epoch_table(
-        paramnames, filterpath=filterfilepath, filters=filters, nprocesses=1
-    )
+    ef = dr.to_epoch_table(paramnames, filterpath=filterfilepath, filters=filters, nprocesses=1)
     return ef
 
 

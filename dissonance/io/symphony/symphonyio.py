@@ -1,3 +1,11 @@
+import logging
+import re
+from math import exp
+from pathlib import Path
+
+import h5py
+import pandas as pd
+
 from dissonance.analysis_functions import detect_spikes
 from dissonance.io.symphony import symphonymapping as sm
 from dissonance.io.symphony.cell import Cell
@@ -5,15 +13,6 @@ from dissonance.io.symphony.epoch import Epoch
 from dissonance.io.symphony.experiment import Experiment
 from dissonance.io.symphony.protocol import Protocol
 from dissonance.io.symphony.rstarr_converter import RStarrConverter
-
-
-import h5py
-import pandas as pd
-
-
-import logging
-import re
-from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
@@ -56,12 +55,12 @@ class SymphonyIO:
 
             for ii, (cell, protocol, epoch) in enumerate(self.reader()):
                 if protocol.name == protocolname:
-					# label each epoch with it's timestamp
+                    # label each epoch with it's timestamp
                     # delete the epoch if it currently exists
-                    group_name = f"epoch{epoch.startdate.timestamp()}" 
+                    group_name = f"epoch{epoch.startdate.timestamp()}"
                     if group_name in expgrp:
                         del expgrp[group_name]
-                    epochgrp = expgrp.create_group(f"epoch{epoch.startdate.timestamp()}" )
+                    epochgrp = expgrp.create_group(f"epoch{epoch.startdate.timestamp()}")
 
                     # ADD EPOCH ATTRIBUTES
                     self._update_attrs(protocol, cell, epoch, epochgrp)
@@ -79,14 +78,13 @@ class SymphonyIO:
         finally:
             self.fout.close()
 
-
     def to_h5(self, outputpath: Path):
         try:
             outputpath.parent.mkdir(parents=True, exist_ok=True)
             self.fout = h5py.File(outputpath, mode="w")
             expgrp = self.fout.create_group("experiment")
             for ii, (cell, protocol, epoch) in enumerate(self.reader()):
-                group_name = f"epoch{epoch.startdate.timestamp()}" 
+                group_name = f"epoch{epoch.startdate.timestamp()}"
                 epochgrp = expgrp.create_group(group_name)
 
                 # ADD EPOCH ATTRIBUTES
@@ -111,25 +109,19 @@ class SymphonyIO:
             expgrp = self.fout["experiment"]
             for ii, (cell, protocol, epoch) in enumerate(self.reader()):
 
-                try:
-                    epochgrp = expgrp[f"epoch{ii}"]
+                group_name = f"epoch{epoch.startdate.timestamp()}"
+                epochgrp = expgrp[group_name]
 
-                    # ADD EPOCH ATTRIBUTES
-                    if attrs:
-                        self._update_attrs(protocol, cell, epoch, epochgrp)
-
-                    # ADD RESPONSE DATA - CACHE SPIKES
-                    if responses:
-                        self._update_response(epoch, epochgrp)
-
-                    # ADD GROUP FOR EACH STIMULUS
-                    if stimuli:
-                        self._update_stimuli(epoch, epochgrp)
-
-                except KeyError:
-                    epochgrp = expgrp.create_group(f"epoch{ii}")
+                # ADD EPOCH ATTRIBUTES
+                if attrs:
                     self._update_attrs(protocol, cell, epoch, epochgrp)
+
+                # ADD RESPONSE DATA - CACHE SPIKES
+                if responses:
                     self._update_response(epoch, epochgrp)
+
+                # ADD GROUP FOR EACH STIMULUS
+                if stimuli:
                     self._update_stimuli(epoch, epochgrp)
 
         except Exception as e:
@@ -139,13 +131,36 @@ class SymphonyIO:
 
         self.fout.close()
 
-    def update_rstarr(self, outputpath):
+    def update_epoch_name(self, outputpath):
         try:
             self.fout = h5py.File(outputpath, mode="r+")
             expgrp = self.fout["experiment"]
             for ii, (cell, protocol, epoch) in enumerate(self.reader()):
 
-                epochgrp = expgrp[f"epoch{ii}"]
+                original_name = f"epoch{ii}"
+                original_group = expgrp.get(original_name)
+
+                if original_group is not None:
+                    time_stamp_name = f"epoch{epoch.startdate.timestamp()}"
+                    if expgrp.get(time_stamp_name) is not None:
+                        del expgrp[time_stamp_name]
+                    expgrp.move(original_group.name, f"/experiment/{time_stamp_name}")
+
+        except Exception as e:
+            if self.fout is not None:
+                self.fout.close()
+            raise e
+        else:
+            self.fout.close()
+
+    def update_rstarr(self, outputpath):
+        try:
+            self.fout = h5py.File(outputpath, mode="r+")
+            expgrp = self.fout["experiment"]
+            for ii, (cell, protocol, epoch) in enumerate(self.reader()):
+                group_name = f"epoch{epoch.startdate.timestamp()}"
+                epochgrp = expgrp[group_name]
+
                 try:
                     del epochgrp.attrs["lightamplitude"]
                 except KeyError:
@@ -183,8 +198,7 @@ class SymphonyIO:
     def _update_response(self, epoch: h5py.Group, epochgrp: h5py.Group):
         for response in epoch.responses:
             values = response.data
-            ds = epochgrp.create_dataset(
-                name=response.name, data=values, dtype=float)
+            ds = epochgrp.create_dataset(name=response.name, data=values, dtype=float)
 
             ds.attrs["path"] = response.h5name
 
@@ -192,10 +206,7 @@ class SymphonyIO:
                 spikes, violationidx = detect_spikes(values)
 
                 if spikes is not None:
-                    spds = epochgrp.create_dataset(
-                        name="Spikes",
-                        data=spikes,
-                        dtype=float)
+                    spds = epochgrp.create_dataset(name="Spikes", data=spikes, dtype=float)
 
                 if violationidx is not None:
                     spds.attrs["violation_idx"] = violationidx
@@ -210,8 +221,7 @@ class SymphonyIO:
             protocolname=protocol.name,
             startdate=str(epoch.startdate),
             enddate=str(epoch.enddate),
-            interpulseinterval=protocol.get(
-                "interpulseInterval", 0),
+            interpulseinterval=protocol.get("interpulseInterval", 0),
             led=protocol.get("led", 0),
         )
 
@@ -226,15 +236,17 @@ class SymphonyIO:
         except:
             epochgrp.attrs["backgroundval"] = 0.0
 
-        params.update(dict(
-            stimtime=protocol.get("stimTime", 0.0),
-            samplerate=protocol.get("sampleRate", 0.0),
-            tailtime=protocol.get("tailTime", 0.0),
-            ndf=epoch.protocol_parameters("ndf"),
-            holdingpotential=epoch.holdingpotential,
-        ))
+        params.update(
+            dict(
+                stimtime=protocol.get("stimTime", 0.0),
+                samplerate=protocol.get("sampleRate", 0.0),
+                tailtime=protocol.get("tailTime", 0.0),
+                ndf=epoch.protocol_parameters("ndf"),
+                holdingpotential=epoch.holdingpotential,
+            )
+        )
 
-		# TODO we no longer want to map protocols we haven't defined yet
+        # TODO we no longer want to map protocols we haven't defined yet
         if protocol.name.lower() in sm.PairedPulseFamilyParams.protocolnames:
             params.update(sm.PairedPulseFamilyParams(protocol, epoch).params)
         elif protocol.name.lower() in sm.ChirpStimulusLedParams.protocolnames:
@@ -272,12 +284,15 @@ class SymphonyIO:
             lightmean = protocol["backgroundIntensity"]
         elif lightmean is None:
             lightmean = 0.0
-            logging.warning(f"{(protocol.name, self.finpath.parent, self.finpath.stem, str(epoch.startdate))}: no lightmean")
+            logging.warning(
+                f"{(protocol.name, self.finpath.parent, self.finpath.stem, str(epoch.startdate))}: no lightmean"
+            )
 
         epochgrp.attrs["lightamplitudeSU"] = lightamp
         epochgrp.attrs["lightmeanSU"] = lightmean
 
-        rstarr_amp, rstarr_mean = (
-            self.rstarr.get(protocol.name, protocol.get("led", None), lightamp, lightmean))
+        rstarr_amp, rstarr_mean = self.rstarr.get(
+            protocol.name, protocol.get("led", None), lightamp, lightmean
+        )
         epochgrp.attrs["lightamplitude"] = rstarr_amp
         epochgrp.attrs["lightmean"] = rstarr_mean

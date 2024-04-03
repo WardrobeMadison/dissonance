@@ -1,5 +1,7 @@
 import pandas as pd
+
 from .. import analysis, viewer
+
 
 def open_browsing_window(epochio, filterpath):
     try:

@@ -1,7 +1,5 @@
-
 import pandas as pd
-from PyQt5.QtCore import (pyqtSignal,
-                          pyqtSlot)
+from PyQt5.QtCore import pyqtSignal, pyqtSlot
 
 from ..analysis import IAnalysis
 from ..analysis.charting import MplCanvas

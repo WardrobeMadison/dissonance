@@ -34,24 +34,21 @@ class IEpoch(ABC):
         self.startdate = epochgrp.attrs.get("startdate")
         self.enddate = epochgrp.attrs.get("enddate")
         self.number = float(epochgrp.name.split("/")[-1][5:])
-        self.pctcontrast = (
-            self.lightamplitude / self.lightmean
-            if self.lightmean != 0.0
-            else 0.0)
+        self.pctcontrast = self.lightamplitude / self.lightmean if self.lightmean != 0.0 else 0.0
 
     @property
     def peak_window_range(self) -> Tuple[int, int]:
-        defaultrange =  (0, len(self))
+        defaultrange = (0, len(self))
         if (
-            (self.tracetype == "wholetrace" or self.tracetype == "spiketrace")
-            and self.protocolname == "LedPulseFamily"):
+            self.tracetype == "wholetrace" or self.tracetype == "spiketrace"
+        ) and self.protocolname == "LedPulseFamily":
             return defaultrange
         if self.celltype == r"RGC\OFF-sustained":
-            return (int(self.pretime+self.stimtime), len(self))
+            return (int(self.pretime + self.stimtime), len(self))
         elif self.celltype == r"RGC\OFF-transient":
             return (int(self.pretime + self.stimtime), len(self))
         elif self.celltype == r"RGC\ON-alpha":
-            return (int(self.pretime), int(self.pretime+self.stimtime))
+            return (int(self.pretime), int(self.pretime + self.stimtime))
         else:
             return defaultrange
 
@@ -71,7 +68,7 @@ class IEpoch(ABC):
             try:
                 setattr(self, paramname, value)
             except:
-                #print(f"Couldn't set {paramname, value} on object {self}.")
+                # print(f"Couldn't set {paramname, value} on object {self}.")
                 ...
             return
         else:
@@ -83,8 +80,7 @@ class IEpoch(ABC):
 
     @property
     @abstractproperty
-    def type(self):
-        ...
+    def type(self): ...
 
     def get(self, paramname):
         return [getattr(self, paramname)]
@@ -137,11 +133,10 @@ class EpochBlock(ABC):
         self._trace_len = None
         self._epochs.append(epoch)
 
-
     @property
     def trace_len(self):
         if self._trace_len is None:
-            #self._trace_len = max([len(e) for e in self._traces])
+            # self._trace_len = max([len(e) for e in self._traces])
             # TODO HACK debug the above
             self._trace_len = int(max([len(e) for e in self._epochs]))
         return self._trace_len
@@ -153,25 +148,14 @@ class EpochBlock(ABC):
             [
                 np.pad(epoch.trace, (0, 0 if self.trace_len == len(epoch) else self.trace_len - len(epoch)))
                 for epoch in self._epochs
-            ])
+            ]
+        )
 
     def get(self, paramname) -> np.array:
         try:
-            return np.array(
-                [
-                    getattr(e, paramname)
-                    for e in self._epochs
-                ],
-                dtype=float)
+            return np.array([getattr(e, paramname) for e in self._epochs], dtype=float)
         except:
-            return np.array(
-                [
-                    getattr(e, paramname)
-                    for e in self._epochs
-                ],
-                dtype=str)
+            return np.array([getattr(e, paramname) for e in self._epochs], dtype=str)
 
     def get_unique(self, paramname) -> np.array:
         return np.unique(self.get(paramname))
-
-

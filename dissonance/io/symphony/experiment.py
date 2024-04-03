@@ -1,11 +1,9 @@
-from dissonance.io.symphony.groupbase import GroupBase
-from dissonance.io.symphony.cell import Cell
-
+import re
 
 import h5py
 
-
-import re
+from dissonance.io.symphony.cell import Cell
+from dissonance.io.symphony.groupbase import GroupBase
 
 
 class Experiment(GroupBase):

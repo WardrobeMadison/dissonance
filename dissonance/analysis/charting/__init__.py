@@ -1,4 +1,4 @@
 from .mplcanvas import MplCanvas
-
-from .plot import (PlotCRF, PlotHill, PlotPsth, PlotRaster, PlotSwarm, PlotTrace,
-                   PlotSpikeTrain, PlotWeber, PlotWholeTrace, PlotContrastResponses, PlotWholeCRF, PlotWeberCoeff, PlotCellWeber)
+from .plot import (PlotCellWeber, PlotContrastResponses, PlotCRF, PlotHill,
+                   PlotPsth, PlotRaster, PlotSpikeTrain, PlotSwarm, PlotTrace,
+                   PlotWeber, PlotWeberCoeff, PlotWholeCRF, PlotWholeTrace)

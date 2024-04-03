@@ -10,17 +10,15 @@ root_dir = Path("/Users/jnagy2/Projects/Dissonance/Data/MappedData")
 folders = ["DR", "WT"]
 
 # SET UNCHECKED PATH - CONTAINS STARTDATES TO EXCLUDE
-#uncheckedpath = Path("DemoForJenna.txt")
-#unchecked = io.read_unchecked_file(uncheckedpath)
+# uncheckedpath = Path("DemoForJenna.txt")
+# unchecked = io.read_unchecked_file(uncheckedpath)
 unchecked = None
 uncheckedpath = None
 
 # GET LIST OF ALL FILES TO ANALYZE
 paths = []
 for fldr in folders:
-    paths.extend([
-        file
-        for ii, file in enumerate((root_dir/fldr).glob("*.h5"))])
+    paths.extend([file for ii, file in enumerate((root_dir / fldr).glob("*.h5"))])
 
 # READER FOR MAPPED H5 FILES
 dr = io.DissonanceReader(paths)

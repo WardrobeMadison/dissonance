@@ -1,7 +1,2 @@
-from . import io
-from . import epochtypes
-from . import viewer
-from . import stimulus
-from . import analysis
-from . import analysis_functions
+from . import analysis, analysis_functions, epochtypes, io, stimulus, viewer
 from .logger import init_log

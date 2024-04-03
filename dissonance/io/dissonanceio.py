@@ -1,4 +1,4 @@
-import multiprocessing as mp
+import logging
 import operator
 import re
 from functools import partial, reduce
@@ -6,12 +6,11 @@ from pathlib import Path
 from typing import Any, Dict, List
 
 import h5py
+import multiprocess as mp
 import pandas as pd
 
 from ..analysis.analysistree import AnalysisTree
 from ..epochtypes import epoch_factory
-
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -89,9 +88,7 @@ class DissonanceReader:
             traces.extend(self.h5_to_epochs(filepath, **kwargs))
         return traces
 
-    def to_params(
-        self, paramnames: List[str], filters: Dict = None, nprocesses: int = 5
-    ) -> pd.DataFrame:
+    def to_params(self, paramnames: List[str], filters: Dict = None, nprocesses: int = 5) -> pd.DataFrame:
         dfs = []
         func = partial(self.file_to_paramstable, paramnames=paramnames, filters=filters)
 
@@ -120,9 +117,7 @@ class DissonanceReader:
             params = params.loc[(params.protocolname.isin(protocols))]
 
         if filterpath is not None:
-            startdates_to_exclude = set(
-                pd.read_csv(filterpath, parse_dates=["startdate"]).iloc[:, 0].values
-            )
+            startdates_to_exclude = set(pd.read_csv(filterpath, parse_dates=["startdate"]).iloc[:, 0].values)
         else:
             startdates_to_exclude = None
 

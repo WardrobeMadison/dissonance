@@ -2,6 +2,7 @@ import pandas as pd
 
 from .trees import Node, Tree
 
+
 class AnalysisTree(Tree):
 
     def __init__(self, name, splits, params: pd.DataFrame):
@@ -14,7 +15,7 @@ class AnalysisTree(Tree):
 
         if "startdate" not in self.labels:
             self.labels = [*self.labels, "startdate"]
-        
+
         # sorting params here will propogate to tree display.
         # much faster to use pandas API
         params = params.sort_values(self.labels)

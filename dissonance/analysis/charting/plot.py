@@ -1,3 +1,4 @@
+import logging
 from abc import ABC, abstractmethod
 from collections import defaultdict
 from datetime import datetime
@@ -5,18 +6,15 @@ from pathlib import Path
 from typing import Dict, Union
 
 import matplotlib.pyplot as plt
-from matplotlib.ticker import MaxNLocator
-
 import numpy as np
 import pandas as pd
 from matplotlib.pyplot import Axes
+from matplotlib.ticker import MaxNLocator
 from scipy.stats import sem, ttest_ind
 
-from ...epochtypes import IEpoch, WholeEpoch, WholeEpochs, SpikeEpoch, SpikeEpochs
 from ...analysis_functions import HillEquation, WeberEquation
+from ...epochtypes import IEpoch, SpikeEpoch, SpikeEpochs, WholeEpoch, WholeEpochs
 
-
-import logging
 logger = logging.getLogger(__name__)
 
 
@@ -32,16 +30,18 @@ def p_to_star(p):
 
 
 orange = "#ff7f00"
-gray =   "#999999"
+gray = "#999999"
+
+
 class Pallette:
 
     black = "#000000"
     red = "#CC0000"
-    green =  "#6a9a23"
-    blue =   "#377eb8"
+    green = "#6a9a23"
+    blue = "#377eb8"
     orange = "#ff7f00"
-    gray =   "#999999"
-    purple= "#441488"
+    gray = "#999999"
+    purple = "#441488"
 
     ccolors = dict()
     ccolors["WT"] = "#545354"
@@ -52,58 +52,60 @@ class Pallette:
     ccolors["GG2 KO"] = "magenta"
     ccolors["GG2 control"] = "black"
     ccolors["None"] = "#f07856"
-    #545354
-    #715b68
-    #946073
-    #b86473
-    #d86b69
-    #f07856
-    #fe8c3a
-    #ffa600
+    # 545354
+    # 715b68
+    # 946073
+    # b86473
+    # d86b69
+    # f07856
+    # fe8c3a
+    # ffa600
 
-    def __init__(self, igor:bool=False):
+    def __init__(self, igor: bool = False):
         self.igor = igor
-    
+
     def __getitem__(self, value):
         if self.igor:
             color = None
             if any([x in value for x in ["control", "DR"]]):
-                color =  "black"
+                color = "black"
             elif any([x in value for x in ["WT", "GA1", "KO"]]):
-                color =  "magenta"
+                color = "magenta"
             else:
                 color = "magenta"
             return color
-        else: 
+        else:
             return self.ccolors.get(value, self.orange)
 
 
 class PlotBase(ABC):
 
     @abstractmethod
-    def append_trace(self, *args, **kwargs):
-        ...
+    def append_trace(self, *args, **kwargs): ...
 
     @abstractmethod
-    def to_csv(self, *args, **kwargs):
-        ...
+    def to_csv(self, *args, **kwargs): ...
 
     @abstractmethod
-    def to_image(self, *args, **kwargs):
-        ...
+    def to_image(self, *args, **kwargs): ...
 
     @abstractmethod
-    def to_igor(self, *args, **kwargs):
-        ...
+    def to_igor(self, *args, **kwargs): ...
 
 
 class PlotPsth(PlotBase):
 
-    def __init__(self, ax: Axes, epochs:Union[SpikeEpoch, SpikeEpochs]=None, label=None, igor=False):
+    def __init__(
+        self,
+        ax: Axes,
+        epochs: Union[SpikeEpoch, SpikeEpochs] = None,
+        label=None,
+        igor=False,
+    ):
         self.ax: Axes = ax
 
         self.ax.grid(False)
-        self.ax.margins( y=0)
+        self.ax.margins(y=0)
         self.ax.set_ylabel("Hz / s")
         self.ax.set_xlabel("10ms bins")
 
@@ -120,7 +122,7 @@ class PlotPsth(PlotBase):
     def __str__(self):
         return f"{type(self).__name__}({','.join(map(str,self.labels))})"
 
-    def append_trace(self, epochs:Union[SpikeEpoch, SpikeEpochs], label):
+    def append_trace(self, epochs: Union[SpikeEpoch, SpikeEpochs], label):
         self.cntr += 1
 
         seconds_conversion = 10000 / 100
@@ -129,40 +131,33 @@ class PlotPsth(PlotBase):
             psth = epochs.psth
             name = epochs.get_unique("genotype")[0]
             pretime = epochs.get_unique("pretime")[0]
-            ttp = (epochs.timetopeak - pretime/100) / seconds_conversion
+            ttp = (epochs.timetopeak - pretime / 100) / seconds_conversion
         elif isinstance(epochs, SpikeEpochs):
             n = len(epochs)
             psth = epochs.psth
 
             name = epochs.get_unique("genotype")[0]
             pretime = epochs.get_unique("pretime")[0]
-            ttp = (epochs.timetopeak - pretime/100) / seconds_conversion
+            ttp = (epochs.timetopeak - pretime / 100) / seconds_conversion
         else:
-            psth = np.mean(
-                [
-                    epoch.psth
-                    for epoch in epochs
-                ], axis=1
-            )
+            psth = np.mean([epoch.psth for epoch in epochs], axis=1)
             n = len(epochs)
             name = epochs.genotype.iloc[0]
             pretime = epochs.epoch.iloc[0].stimtime
 
         # CALCULATE TTP AND MAX PEAK
-        X = (np.arange(len(psth)) - pretime/100) / (seconds_conversion)
+        X = (np.arange(len(psth)) - pretime / 100) / (seconds_conversion)
 
         # PLOT VALUES SHIFT BY STIM TIME - DOTTED LINED FOR BOTH TTP AND PEAK AMP
         peakamp = epochs.peakamplitude
-        self.ax.axvline(
-            ttp, 
-            linestyle='--', 
-            color=self.colors[name], 
-            alpha=0.4)
-        self.ax.plot(X, psth, label=f"{label}(n={n})\nttp={ttp:.3f}, pa={peakamp:.1f}", color=self.colors[name])
+        self.ax.axvline(ttp, linestyle="--", color=self.colors[name], alpha=0.4)
+        self.ax.plot(
+            X, psth, label=f"{label}(n={n})\nttp={ttp:.3f}, pa={peakamp:.1f}", color=self.colors[name]
+        )
 
         # UPDATE LEGEND WITH EACH APPEND
         # TEXT BOX TO THE LEFT
-        self.ax.legend(bbox_to_anchor = (1.04, 0.5), loc="center left")
+        self.ax.legend(bbox_to_anchor=(1.04, 0.5), loc="center left")
 
         # SAVE DATA FOR STORING LATER
         self.labels.append(label)
@@ -171,11 +166,9 @@ class PlotPsth(PlotBase):
 
         if self.cntr == 1:
             # SHADE STIM TIME
-            self.ax.axvspan(0, (pretime / 10000), alpha=0.05, color='black')
+            self.ax.axvspan(0, (pretime / 10000), alpha=0.05, color="black")
 
-        xticks = (
-            [min(X)]
-            + list(np.arange(0, max(X), 0.5)))
+        xticks = [min(X)] + list(np.arange(0, max(X), 0.5))
 
         self.ax.set_xticks(xticks)
 
@@ -198,16 +191,20 @@ class PlotPsth(PlotBase):
 
         df.to_csv(filename, index=False)
 
-    def to_image(self, *args, **kwargs):
-        ...
+    def to_image(self, *args, **kwargs): ...
 
-    def to_igor(self, *args, **kwargs):
-        ...
+    def to_igor(self, *args, **kwargs): ...
 
 
 class PlotRaster(PlotBase):
 
-    def __init__(self, ax, epochs:Union[SpikeEpoch, SpikeEpochs]=None, title=None, igor=False):
+    def __init__(
+        self,
+        ax,
+        epochs: Union[SpikeEpoch, SpikeEpochs] = None,
+        title=None,
+        igor=False,
+    ):
         self.ax = ax
 
         # INITIAL AXIS SETTINGS
@@ -228,7 +225,7 @@ class PlotRaster(PlotBase):
     def __str__(self):
         return f"{type(self).__name__}({','.join(map(str,self.labels))})"
 
-    def append_trace(self, epochs:Union[SpikeEpoch, SpikeEpochs]):
+    def append_trace(self, epochs: Union[SpikeEpoch, SpikeEpochs]):
         """Raster plots
 
         Args:        #self.ax.legend()
@@ -237,14 +234,17 @@ class PlotRaster(PlotBase):
             ax (Axes, optional): Axis obj from parent figure, creates figure if not provided. Defaults to None.
         """
         if self.ax is None:
-            fig, ax, = plt.subplots()
+            (
+                fig,
+                ax,
+            ) = plt.subplots()
 
         genotype = epochs.get_unique("genotype")[0]
 
         toplt = []
         for ii, epoch in enumerate(epochs):
             spikes = epoch.spikes / 10000
-            y = [ii+1] * len(spikes)
+            y = [ii + 1] * len(spikes)
             toplt.append((spikes, y))
 
         for x, y in toplt:
@@ -255,7 +255,7 @@ class PlotRaster(PlotBase):
         self.ax.set_title(title)
 
         # SET THESE EACH LOOP?
-        self.ax.set_yticks(np.arange(len(epochs))+1)
+        self.ax.set_yticks(np.arange(len(epochs)) + 1)
         self.ax.set_yticklabels([f"{epoch.number}" for epoch in epochs])
 
         for epoch in epochs:
@@ -280,22 +280,26 @@ class PlotRaster(PlotBase):
 
         df.to_csv(filename, index=False)
 
-    def to_image(self, *args, **kwargs):
-        ...
+    def to_image(self, *args, **kwargs): ...
 
-    def to_igor(self, *args, **kwargs):
-        ...
+    def to_igor(self, *args, **kwargs): ...
 
 
 class PlotWholeTrace(PlotBase):
     cmap = plt.get_cmap("tab10")
 
-    def __init__(self, ax:Axes, epoch:Union[WholeEpoch, WholeEpochs]=None, igor=False, summarytype="epoch"):
+    def __init__(
+        self,
+        ax: Axes,
+        epoch: Union[WholeEpoch, WholeEpochs] = None,
+        igor=False,
+        summarytype="epoch",
+    ):
         self.ax = ax
         self.ax.grid(False)
-        #self.ax.margins(x=0, y=0)
-        #self.ax.yaxis.set_visible(False)
-        #self.ax.spines["left"].set_visible(False)
+        # self.ax.margins(x=0, y=0)
+        # self.ax.yaxis.set_visible(False)
+        # self.ax.spines["left"].set_visible(False)
 
         # IF SUMMARIZING CELL NEED A DIFFERENT COLOR FOR EACH CELL, NOT GENOTYPE
         self.summarytype = summarytype
@@ -304,7 +308,7 @@ class PlotWholeTrace(PlotBase):
         # LISTS USED IN EXPORTING DATA
         self.labels = []
         self.values = []
-        
+
         # KEEP TRACK OF NUMBER OF PLOTS. MAYBE USED TO CYCLE COLORS IF IN CELL SUMMARY MODE
         self.cntr = 0
 
@@ -315,8 +319,7 @@ class PlotWholeTrace(PlotBase):
         return f"{type(self).__name__}({','.join(map(str,self.labels))})"
 
     def append_trace(self, epoch=Union[WholeEpoch, WholeEpochs]):
-        """Plot traces
-        """
+        """Plot traces"""
         # GET ATTRIBUTES FOR PLOT
         pretime = epoch.get("pretime")[0]
         if isinstance(epoch, IEpoch):
@@ -348,30 +351,20 @@ class PlotWholeTrace(PlotBase):
         peakamp = epoch.peakamplitude
         ttp = epoch.timetopeak - pretime
         metricstr = f"whm={whm},ttp={ttp},pa={peakamp:.0f}"
-        label += "\n"+metricstr
-
+        label += "\n" + metricstr
 
         # PLOT TRACE VALUES
         X = np.arange(len(epoch.trace)) - pretime
-        self.ax.plot(
-            X,
-            epoch.trace, label=label,
-            color=color,
-            alpha=0.4)
+        self.ax.plot(X, epoch.trace, label=label, color=color, alpha=0.4)
 
         # HORIZONTAL LINE ACROSS HALF MAX
         y1, y2 = epoch.trace[start], epoch.trace[stop]
         x1, x2 = start - pretime, stop - pretime
 
-        self.ax.plot(
-            [x1, x2], [y1, y2],
-            "--", color=color)
+        self.ax.plot([x1, x2], [y1, y2], "--", color=color)
 
         # MARKER ON PEAK AMPLITUDE
-        self.ax.scatter(
-            ttp, epoch.peakamplitude,
-            marker="x",
-            color=color)
+        self.ax.scatter(ttp, epoch.peakamplitude, marker="x", color=color)
 
         # APPEND VALUES NEEDED FOR WRITING OUT
         self.labels.append(label)
@@ -379,7 +372,6 @@ class PlotWholeTrace(PlotBase):
 
         # UPDATE AXIS LEGEND - MOVE TO SIDE
         self.ax.legend(bbox_to_anchor=(1.04, 0.50), loc="center left")
-
 
         # ADD X TICKS
         xticks = [min(X)] + list(np.arange(0, max(X), 5000))
@@ -389,35 +381,32 @@ class PlotWholeTrace(PlotBase):
         self.ax.xaxis.set_ticklabels(xlabels)
         self.ax.set_xlim((min(X), max(X)))
 
-        #try:
+        # try:
         #    # REMOVE BEGINNING AND END POINT. ALSO REMOVE 0.0
         #    self.ax.xaxis.get_ticklabels()[0].set_visible(False)
         #    self.ax.xaxis.get_ticklabels()[-1].set_visible(False)
-        #except:
+        # except:
         #    print("Couldn't remove ticks")
 
         self.cntr += 1
 
-    def to_csv(self, *args, **kwargs):
-        ...
+    def to_csv(self, *args, **kwargs): ...
 
-    def to_image(self, *args, **kwargs):
-        ...
+    def to_image(self, *args, **kwargs): ...
 
-    def to_igor(self, *args, **kwargs):
-        ...
+    def to_igor(self, *args, **kwargs): ...
 
 
 class PlotTrace(PlotBase):
 
-    def __init__(self, ax: Axes, epoch:IEpoch=None, igor=False):
+    def __init__(self, ax: Axes, epoch: IEpoch = None, igor=False):
         self.ax: Axes = ax
 
         self.ax.set_ylabel("pA")
         self.ax.set_xlabel("seconds")
         self.ax.margins(y=0)
-        #self.ax.spines["left"].set_visible(False)
-        #self.ax.get_yaxis().set_visible(False)
+        # self.ax.spines["left"].set_visible(False)
+        # self.ax.get_yaxis().set_visible(False)
 
         self.colors = Pallette(igor)
 
@@ -430,9 +419,8 @@ class PlotTrace(PlotBase):
     def __str__(self):
         return f"{type(self).__name__}({','.join(map(str,self.labels))})"
 
-    def append_trace(self, epoch:IEpoch):
-        """Plot traces
-        """
+    def append_trace(self, epoch: IEpoch):
+        """Plot traces"""
         # GET ATTRIBUTES FOR PLOT
         pretime = epoch.get("pretime")[0]
         if isinstance(epoch, IEpoch):
@@ -441,28 +429,18 @@ class PlotTrace(PlotBase):
             label = f'{epoch.get("cellname")[0]}, {epoch.get("lightamplitude")[0]}, {epoch.get("lightmean")}'
 
         # PLOT SPIKES IF SPIKETRACE
-        if (hasattr(epoch, "spikes")):
+        if hasattr(epoch, "spikes"):
             y = epoch.trace[epoch.spikes]
-            self.ax.scatter(
-                epoch.spikes - pretime,
-                y,
-                marker="x", color=self.colors[epoch.genotype])
+            self.ax.scatter(epoch.spikes - pretime, y, marker="x", color=self.colors[epoch.genotype])
 
         # IF WHOLE TRACE AND HAS SPIKES, PLOT INTERPOLATED TOO
         X = np.arange(len(epoch.trace)) - pretime
-        if (epoch.type.lower() == "wholetrace" and epoch.has_spikes):
+        if epoch.type.lower() == "wholetrace" and epoch.has_spikes:
             y = epoch.interpolated
-            self.ax.plot(
-                X,
-                y,
-                "--", color=self.colors[epoch.genotype])
+            self.ax.plot(X, y, "--", color=self.colors[epoch.genotype])
 
         # PLOT TRACE VALUES
-        self.ax.plot(
-            X,
-            epoch.trace, label=label,
-            color=self.colors[epoch.get("genotype")[0]],
-            alpha=0.4)
+        self.ax.plot(X, epoch.trace, label=label, color=self.colors[epoch.get("genotype")[0]], alpha=0.4)
 
         # FORMAT AXES - EVERY 0.5 SECONDS FROM STIMTIME MARKED AT 0.0
         xticks = [min(X)] + list(np.arange(0, max(X), 5000))
@@ -494,21 +472,19 @@ class PlotTrace(PlotBase):
 
         df.to_csv(filename, index=False)
 
-    def to_image(self, *args, **kwargs):
-        ...
+    def to_image(self, *args, **kwargs): ...
 
-    def to_igor(self, *args, **kwargs):
-        ...
+    def to_igor(self, *args, **kwargs): ...
 
 
 class PlotSpikeTrain(PlotBase):
 
-    def __init__(self, ax: Axes, epoch:IEpoch=None, igor=False):
+    def __init__(self, ax: Axes, epoch: IEpoch = None, igor=False):
         self.ax: Axes = ax
 
         self.ax.set_ylabel("pA")
         self.ax.set_xlabel("seconds")
-        self.ax.margins( y=0)
+        self.ax.margins(y=0)
         self.ax.spines["left"].set_visible(False)
         self.ax.get_yaxis().set_visible(False)
 
@@ -523,9 +499,8 @@ class PlotSpikeTrain(PlotBase):
     def __str__(self):
         return f"{type(self).__name__}({','.join(map(str,self.labels))})"
 
-    def append_trace(self, epoch:IEpoch):
-        """Plot traces
-        """
+    def append_trace(self, epoch: IEpoch):
+        """Plot traces"""
         # GET ATTRIBUTES FOR PLOT
         stimtime = epoch.get("stimtime")[0]
         if isinstance(epoch, IEpoch):
@@ -534,20 +509,13 @@ class PlotSpikeTrain(PlotBase):
             label = f'{epoch.get("cellname")[0]}, {epoch.get("lightamplitude")[0]}, {epoch.get("lightmean")}'
 
         # PLOT SPIKES IF SPIKETRACE
-        if (epoch.type == "spiketrace" and epoch.spikes is not None):
+        if epoch.type == "spiketrace" and epoch.spikes is not None:
             y = epoch.trace[epoch.spikes]
-            self.ax.scatter(
-                epoch.spikes - stimtime,
-                y,
-                marker="x", color=self.colors[epoch.genotype])
+            self.ax.scatter(epoch.spikes - stimtime, y, marker="x", color=self.colors[epoch.genotype])
 
         # PLOT TRACE VALUES
         X = np.arange(len(epoch.trace)) - stimtime
-        self.ax.plot(
-            X,
-            epoch.trace, label=label,
-            color=self.colors[epoch.get("genotype")[0]],
-            alpha=0.4)
+        self.ax.plot(X, epoch.trace, label=label, color=self.colors[epoch.get("genotype")[0]], alpha=0.4)
 
         # FORMAT AXES
         xticks = [min(X)] + list(np.arange(0, max(X), 5000))
@@ -579,22 +547,20 @@ class PlotSpikeTrain(PlotBase):
 
         df.to_csv(filename, index=False)
 
-    def to_image(self, *args, **kwargs):
-        ...
+    def to_image(self, *args, **kwargs): ...
 
-    def to_igor(self, *args, **kwargs):
-        ...
+    def to_igor(self, *args, **kwargs): ...
 
 
 class PlotSwarm(PlotBase):
 
-    def __init__(self, ax: Axes, metric: str = "peakamplitude", eframe:pd.DataFrame=None, igor=False):
+    def __init__(self, ax: Axes, metric: str = "peakamplitude", eframe: pd.DataFrame = None, igor=False):
         self.ax: Axes = ax
         self.metric = metric
-        #self.ax.margins(y=0)
+        # self.ax.margins(y=0)
 
         # INITIAL AXIS SETTINGS
-        #self.ax.spines["bottom"].set_visible(False)
+        # self.ax.spines["bottom"].set_visible(False)
         self.ax.grid(False)
 
         self.colors = Pallette(igor)
@@ -621,75 +587,52 @@ class PlotSwarm(PlotBase):
         toplt = []
         ymax = 0.0
         toppoint = 0.0  # NEED AXIS TO BE % ABOVE SEM BAR
-        for ii, (name, frame) in enumerate(eframe.groupby("genotype",sort=False)):
+        for ii, (name, frame) in enumerate(eframe.groupby("genotype", sort=False)):
             celltraces = frame.epoch.values
 
             if self.metric == "peakamplitude":
-                values = np.array([
-                    cell.peakamplitude
-                    for cell in celltraces
-                ], dtype=float)
+                values = np.array([cell.peakamplitude for cell in celltraces], dtype=float)
 
             elif self.metric == "timetopeak":
-                values = np.array([
-                    cell.timetopeaksec
-                    for cell in celltraces
-                ], dtype=float)
+                values = np.array([cell.timetopeaksec for cell in celltraces], dtype=float)
 
             meanval = np.mean(values)
             semval = sem(values)
 
             # CHANGE SIGN OF AXIS IF NEEDED
             # Compare within current genotype and then to other values
-            ymax = (
-                max(ymax, np.max(values)) 
-                if meanval >= 0 
-                else min(ymax, np.min(values)))
-            toppoint = (
-                    max(toppoint, meanval + semval) 
-                    if meanval >= 0 else 
-                    min(toppoint, meanval-semval))
-            toppoint = (
-                max(toppoint, ymax) 
-                if toppoint >= 0 else 
-                min(toppoint, ymax))
+            ymax = max(ymax, np.max(values)) if meanval >= 0 else min(ymax, np.min(values))
+            toppoint = max(toppoint, meanval + semval) if meanval >= 0 else min(toppoint, meanval - semval)
+            toppoint = max(toppoint, ymax) if toppoint >= 0 else min(toppoint, ymax)
 
             toplt.append(
-                dict(
-                    color=self.colors[name],
-                    label=name,
-                    values=values,
-                    meanvalue=meanval,
-                    semval=semval))
+                dict(color=self.colors[name], label=name, values=values, meanvalue=meanval, semval=semval)
+            )
 
-            self.ax.bar(ii,
-                        height=meanval,
-                        yerr=semval,
-                        width = 0.90,
-                        #capsize=12,
-                        tick_label=name,
-                        edgecolor=self.colors[name],
-                        linewidth = 2,
-                        capsize=5,
-                        color='None')
+            self.ax.bar(
+                ii,
+                height=meanval,
+                yerr=semval,
+                width=0.90,
+                # capsize=12,
+                tick_label=name,
+                edgecolor=self.colors[name],
+                linewidth=2,
+                capsize=5,
+                color="None",
+            )
 
             # PLOT SCATTER
-            self.ax.scatter(
-                np.repeat(ii, len(values)),
-                values,
-                alpha=0.25,
-                color=self.colors[name])
+            self.ax.scatter(np.repeat(ii, len(values)), values, alpha=0.25, color=self.colors[name])
 
             self.values.extend(toplt)
 
             # LABEL NUMBER OF CELLS
-            self.ax.text(ii, 0, f"n={len(values)}",
-                         ha='center', va='bottom', color='k')
+            self.ax.text(ii, 0, f"n={len(values)}", ha="center", va="bottom", color="k")
 
         # CALCULATE SIGNIFICANCE
         if len(toplt) > 1:
-            stat, p = ttest_ind(
-                toplt[0]["values"], toplt[1]["values"])
+            stat, p = ttest_ind(toplt[0]["values"], toplt[1]["values"])
 
             stars = p_to_star(p)
             stars = f"p={p:0.03f}" if stars == "ns" and p < 0.06 else stars
@@ -698,27 +641,18 @@ class PlotSwarm(PlotBase):
             # PLOT SIGNFICANCE LABEL
             # HACK PERCENT TO PUT ABOVE MAX POINT. DOESN'T WORK WELL FOR SMALL VALUES
             pct = 0.05
-            ay, h, col = toppoint + toppoint * pct, toppoint * pct, 'k'
+            ay, h, col = toppoint + toppoint * pct, toppoint * pct, "k"
 
-            self.ax.plot(
-                [x1, x1, x2, x2],
-                [ay, ay+h, ay+h, ay],
-                lw=1.5, color=col)
+            self.ax.plot([x1, x1, x2, x2], [ay, ay + h, ay + h, ay], lw=1.5, color=col)
 
-            self.ax.text(
-                (x1+x2)*.5,
-                ay+h,
-                stars,
-                ha='center', va='bottom',
-                color=col)
+            self.ax.text((x1 + x2) * 0.5, ay + h, stars, ha="center", va="bottom", color=col)
 
         # FIG SETTINGS
-        lightamplitude, lightmean = eframe[[
-            "lightamplitude", "lightmean"]].iloc[0]
+        lightamplitude, lightmean = eframe[["lightamplitude", "lightmean"]].iloc[0]
         self.ax.set_title(f"{self.metric}: {lightamplitude, lightmean}")
 
         # X AXIS FORMAT
-        self.ax.xaxis.set_ticks_position('none')
+        self.ax.xaxis.set_ticks_position("none")
         self.ax.set_xticks(np.arange(len(toplt)), dtype=float)
         self.ax.set_xticklabels([x["label"] for x in toplt])
 
@@ -738,18 +672,16 @@ class PlotSwarm(PlotBase):
 
         self.labels.append([lightamplitude, lightmean])
 
-    def to_csv(self, filepath=None):
-        ...
+    def to_csv(self, filepath=None): ...
 
-    def to_image(self, *args, **kwargs):
-        ...
+    def to_image(self, *args, **kwargs): ...
 
-    def to_igor(self, *args, **kwargs):
-        ...
+    def to_igor(self, *args, **kwargs): ...
+
 
 class PlotWholeCRF(PlotBase):
 
-    def __init__(self, ax: Axes, metric:str, eframe:pd.DataFrame=None, igor=False):
+    def __init__(self, ax: Axes, metric: str, eframe: pd.DataFrame = None, igor=False):
         self.ax: Axes = ax
         self.metric = metric
 
@@ -763,7 +695,7 @@ class PlotWholeCRF(PlotBase):
 
         # funky x axis for this
         self.pos = np.arange(8)
-        #self.xdict = dict(zip(self.xticks, self.pos))
+        # self.xdict = dict(zip(self.xticks, self.pos))
 
         # for writing to csv
         self.labels = []
@@ -792,10 +724,12 @@ class PlotWholeCRF(PlotBase):
                 contrast = lightamp / lightmean
 
                 # GET PEAK AMPLITUDE FROM EACH PSTH - USED IN SEM
-                peakamps = np.array([
-                    epoch.crf_value if self.metric == "peakamplitude" else epoch.timetopeak
-                    for epoch in frame.epoch.values
-                ])
+                peakamps = np.array(
+                    [
+                        epoch.crf_value if self.metric == "peakamplitude" else epoch.timetopeak
+                        for epoch in frame.epoch.values
+                    ]
+                )
 
                 X.append(contrast)
                 Y.append(np.mean(peakamps))
@@ -813,27 +747,25 @@ class PlotWholeCRF(PlotBase):
             X = np.array(X)
             Y = np.array(Y)
             sems = np.array(sems)
-            #X = X[indexes]
-            #Y = Y[indexes]
-            #sems = sems[indexes]
+            # X = X[indexes]
+            # Y = Y[indexes]
+            # sems = sems[indexes]
 
             # PLOT CRF EVENLY - IGNORE CONTRAST VALUES
-            #X_ = [self.xdict.get(x, 0.0) for x in X]
-            #self.ax.errorbar(
-                #X_, Y,
-                #yerr=sems,
-                #label=f"{genotype} (n = {len(peakamps)})",
-                #color=self.colors[genotype])
+            # X_ = [self.xdict.get(x, 0.0) for x in X]
+            # self.ax.errorbar(
+            # X_, Y,
+            # yerr=sems,
+            # label=f"{genotype} (n = {len(peakamps)})",
+            # color=self.colors[genotype])
 
-            #self.ax.plot(X_ ,Y,
+            # self.ax.plot(X_ ,Y,
             #    label=f"{genotype} (n = {len(peakamps)})",
             #    color=self.colors[genotype])
 
-            self.ax.plot(X ,Y,
-                label=f"{genotype} (n = {len(peakamps)})",
-                color=self.colors[genotype])
-            #self.ax.fill_between(X_, Y-sems, Y+sems, color=self.colors[genotype], alpha=0.25)
-            self.ax.fill_between(X, Y-sems, Y+sems, color=self.colors[genotype], alpha=0.25)
+            self.ax.plot(X, Y, label=f"{genotype} (n = {len(peakamps)})", color=self.colors[genotype])
+            # self.ax.fill_between(X_, Y-sems, Y+sems, color=self.colors[genotype], alpha=0.25)
+            self.ax.fill_between(X, Y - sems, Y + sems, color=self.colors[genotype], alpha=0.25)
 
             self.labels.append(genotype)
             self.xvalues.append(X)
@@ -841,8 +773,8 @@ class PlotWholeCRF(PlotBase):
             self.sems.append(sems)
 
             # FORMAT X AXIS
-            # TODO HOW TO REMOVE 0? 
-            #self.ax.spines["bottom"].set_bounds(0, 7)
+            # TODO HOW TO REMOVE 0?
+            # self.ax.spines["bottom"].set_bounds(0, 7)
             self.xticks = [-1, -0.5, 0, 0.5, 1]
             self.ax.set_xticks(self.xticks)
             self.ax.set_xticklabels([f"{x*100:.0f}" for x in self.xticks])
@@ -854,20 +786,20 @@ class PlotWholeCRF(PlotBase):
                 self.ax.set_ylim((top, bottom))
                 locator = MaxNLocator(prune="both", nbins=4)
                 self.ax.yaxis.set_major_locator(locator)
-        
+
             if self.cntr == 2:
                 self.t_test()
 
-            plt.locator_params(axis='y', nbins=4)
+            plt.locator_params(axis="y", nbins=4)
 
     def set_axis_labels(self):
         self.ax.set_xlabel("Percent Contrast")
         if self.metric.lower() == "timetopeak":
             self.ax.set_ylabel("Seconds")
-            #self.ax.set_title("Time to Peak Amplitude over Contrast")
+            # self.ax.set_title("Time to Peak Amplitude over Contrast")
         else:
             self.ax.set_ylabel("Response (pA)")
-            #self.ax.set_title("Contrast Response Curve")
+            # self.ax.set_title("Contrast Response Curve")
 
     def t_test(self):
         g1, g2 = self.labels[:2]
@@ -875,10 +807,9 @@ class PlotWholeCRF(PlotBase):
         v2 = self.peakamps[g2]
 
         ylim = 0.0
-        X = self.xvalues[0] # HACK assume same x values
+        X = self.xvalues[0]  # HACK assume same x values
         for ii, (a1, a2) in enumerate(zip(v1, v2)):
-            stat, p = ttest_ind(
-                a1, a2)
+            stat, p = ttest_ind(a1, a2)
             stars = p_to_star(p)
 
             if stars != "ns":
@@ -886,27 +817,28 @@ class PlotWholeCRF(PlotBase):
                 # GETS POSITION TO WRITE STARS
                 # ON TOP MOST ERROR BAR
                 ymax = np.sign(np.mean(a1)) * max(
-                    (np.abs(np.mean(a1)) + sem(a1)),
-                    (np.abs(np.mean(a2)) + sem(a2)))
+                    (np.abs(np.mean(a1)) + sem(a1)), (np.abs(np.mean(a2)) + sem(a2))
+                )
 
                 ylim = max(ylim, ymax) if ymax > 0 else min(ylim, ymax)
 
                 self.ax.text(
                     X[ii],  # ASSUME IN SAME ORDER
-                    ymax*1.05,
+                    ymax * 1.05,
                     stars,
-                    ha='center',
-                    va='bottom', color='k', rotation=90)
+                    ha="center",
+                    va="bottom",
+                    color="k",
+                    rotation=90,
+                )
 
         bottom, top = self.ax.get_ylim()
         ylim * 1.08
         self.ax.set_ylim((bottom, ylim * 1.08))
 
-    def to_csv(self):
-        ...
+    def to_csv(self): ...
 
-    def to_image(self, *args, **kwargs):
-        ...
+    def to_image(self, *args, **kwargs): ...
 
     def to_igor(self, outputdir: Path, *args, **kwargs):
 
@@ -919,10 +851,9 @@ class PlotWholeCRF(PlotBase):
         df.to_csv(outputdir / f"PlotCRF{datetime.now()}.txt", sep="\t", index=False)
 
 
-
 class PlotCRF(PlotBase):
 
-    def __init__(self, ax: Axes, metric:str, eframe:pd.DataFrame=None, igor=False):
+    def __init__(self, ax: Axes, metric: str, eframe: pd.DataFrame = None, igor=False):
         self.ax: Axes = ax
         self.metric = metric
 
@@ -966,10 +897,12 @@ class PlotCRF(PlotBase):
 
                 if contrast in self.xticks:
                     # GET PEAK AMPLITUDE FROM EACH PSTH - USED IN SEM
-                    peakamps = np.array([
-                        epoch.peakamplitude if self.metric == "peakamplitude" else epoch.timetopeak
-                        for epoch in frame.epoch.values
-                    ])
+                    peakamps = np.array(
+                        [
+                            epoch.peakamplitude if self.metric == "peakamplitude" else epoch.timetopeak
+                            for epoch in frame.epoch.values
+                        ]
+                    )
 
                     X.append(contrast)
                     Y.append(np.mean(peakamps))
@@ -989,17 +922,14 @@ class PlotCRF(PlotBase):
 
             # PLOT CRF EVENLY - IGNORE CONTRAST VALUES
             X_ = [self.xdict.get(x, 0.0) for x in X]
-            #self.ax.errorbar(
+            # self.ax.errorbar(
             #    X_, Y,
             #    yerr=sems,
             #    label=f"{genotype} (n = {len(peakamps)})",
             #    color=self.colors[genotype])
 
-            self.ax.plot(X_ ,Y,
-                label=f"{genotype} (n = {len(peakamps)})",
-                color=self.colors[genotype])
-            self.ax.fill_between(X_, Y-sems, Y+sems, color=self.colors[genotype], alpha=0.25)
-
+            self.ax.plot(X_, Y, label=f"{genotype} (n = {len(peakamps)})", color=self.colors[genotype])
+            self.ax.fill_between(X_, Y - sems, Y + sems, color=self.colors[genotype], alpha=0.25)
 
             self.labels.append(genotype)
             self.xvalues.append(X)
@@ -1007,8 +937,8 @@ class PlotCRF(PlotBase):
             self.sems.append(sems)
 
             # FORMAT X AXIS
-            # TODO HOW TO REMOVE 0? 
-            #self.ax.spines["bottom"].set_bounds(0, 7)
+            # TODO HOW TO REMOVE 0?
+            # self.ax.spines["bottom"].set_bounds(0, 7)
             self.ax.set_xticks(np.arange(8))
             self.ax.set_xticklabels([f"{x*100:.0f}%" for x in self.xticks])
 
@@ -1020,12 +950,11 @@ class PlotCRF(PlotBase):
                 self.ax.set_ylim((top, bottom))
                 locator = MaxNLocator(prune="both", nbins=4)
                 self.ax.yaxis.set_major_locator(locator)
-        
+
             self.ax.legend()
-            
+
             if self.cntr == 2:
                 self.t_test()
-
 
     def set_axis_labels(self):
         self.ax.set_xlabel("Percent Contrast")
@@ -1043,33 +972,33 @@ class PlotCRF(PlotBase):
 
         ylim = 0.0
         for ii, (a1, a2) in enumerate(zip(v1, v2)):
-            stat, p = ttest_ind(
-                a1, a2)
+            stat, p = ttest_ind(a1, a2)
             stars = p_to_star(p)
 
-            if stars!="ns":
+            if stars != "ns":
                 # GETS POSITION TO WRITE STARS
                 # ON TOP MOST ERROR BAR
                 ymax = np.sign(np.mean(a1)) * max(
-                    (np.abs(np.mean(a1)) + sem(a1)),
-                    (np.abs(np.mean(a2)) + sem(a2)))
+                    (np.abs(np.mean(a1)) + sem(a1)), (np.abs(np.mean(a2)) + sem(a2))
+                )
 
                 ylim = max(ylim, ymax) if ymax > 0 else min(ylim, ymax)
 
                 self.ax.text(
                     ii,  # ASSUME IN SAME ORDER
-                    ymax*1.05,
+                    ymax * 1.05,
                     stars,
-                    ha='center',
-                    va='bottom', color='k', rotation=90)
+                    ha="center",
+                    va="bottom",
+                    color="k",
+                    rotation=90,
+                )
 
         self.ax.set_ylim((0, ylim * 1.08))
 
-    def to_csv(self):
-        ...
+    def to_csv(self): ...
 
-    def to_image(self, *args, **kwargs):
-        ...
+    def to_image(self, *args, **kwargs): ...
 
     def to_igor(self, outputdir: Path, *args, **kwargs):
 
@@ -1081,9 +1010,10 @@ class PlotCRF(PlotBase):
 
         df.to_csv(outputdir / f"PlotCRF{datetime.now()}.txt", sep="\t", index=False)
 
+
 class PlotCellWeber(PlotBase):
 
-    def __init__(self, ax:Axes, eframe:pd.DataFrame=None, igor=False):
+    def __init__(self, ax: Axes, eframe: pd.DataFrame = None, igor=False):
         self.ax = ax
         self.fits: Dict[str, Dict[str, WeberEquation]] = defaultdict(list)
 
@@ -1117,9 +1047,10 @@ class PlotCellWeber(PlotBase):
         minamp0 = minamp0.lightamplitude.min()
 
         frame = eframe.loc[
-            (eframe.lightmean == eframe.lightamplitude) |
-            ((eframe.lightmean == 0.0) & (eframe.lightamplitude == minamp0))]
-        frame = frame.loc[frame.lightamplitude > 0] # get rid of -10000
+            (eframe.lightmean == eframe.lightamplitude)
+            | ((eframe.lightmean == 0.0) & (eframe.lightamplitude == minamp0))
+        ]
+        frame = frame.loc[frame.lightamplitude > 0]  # get rid of -10000
 
         frame = frame.sort_values(["lightmean", "lightamplitude"])
 
@@ -1138,37 +1069,26 @@ class PlotCellWeber(PlotBase):
 
         # TODO decide on line labels
         self.ax.plot(topltX, weber(topltX), color=self.colors[genotype])
-        self.ax.scatter(*weber.normalize(X, Y),
-                        alpha=0.4, color=self.colors[genotype])
+        self.ax.scatter(*weber.normalize(X, Y), alpha=0.4, color=self.colors[genotype])
 
         self.ax.set_title(f"iHalf={weber.ihalf:.0f}, r2={weber.r2:.3f}")
 
-        #self.fits[f"{genotype}mean"] = weber
+        # self.fits[f"{genotype}mean"] = weber
 
     def to_csv(self, outputdir: Path = Path(".")):
         data = []
         for label, fit in self.fits.items():
-            row = [
-                label,
-                fit.beta,
-                fit.r2
-            ]
+            row = [label, fit.beta, fit.r2]
             data.append(row)
 
-        df = pd.DataFrame(
-            columns="Label Beta R2".split(),
-            data=data
-        )
+        df = pd.DataFrame(columns="Label Beta R2".split(), data=data)
 
         outputpath = outputdir / (self.filestem + "_Data.csv")
         df.to_csv(outputpath, index=False)
 
-    def to_image(self, *args, **kwargs):
-        ...
+    def to_image(self, *args, **kwargs): ...
 
-    def to_igor(self, *args, **kwargs):
-        ...
-
+    def to_igor(self, *args, **kwargs): ...
 
 
 class PlotHill(PlotBase):
@@ -1222,19 +1142,16 @@ class PlotHill(PlotBase):
         # TODO decide on label based on grouping
         self.fits[f"{genotype}_average"] = hill
 
-    def to_csv(self):
-        ...
+    def to_csv(self): ...
 
-    def to_image(self, *args, **kwargs):
-        ...
+    def to_image(self, *args, **kwargs): ...
 
-    def to_igor(self, *args, **kwargs):
-        ...
+    def to_igor(self, *args, **kwargs): ...
 
 
 class PlotWeber(PlotBase):
 
-    def __init__(self, ax:Axes, eframe:pd.DataFrame=None, igor=False):
+    def __init__(self, ax: Axes, eframe: pd.DataFrame = None, igor=False):
         self.ax = ax
         self.fits: Dict[str, Dict[str, WeberEquation]] = defaultdict(dict)
 
@@ -1272,9 +1189,10 @@ class PlotWeber(PlotBase):
             minamp0 = minamp0.lightamplitude.min()
 
             frame = framef.loc[
-                (framef.lightmean == framef.lightamplitude) |
-                ((framef.lightmean == 0.0) & (framef.lightamplitude == minamp0))]
-            frame = frame.loc[frame.lightamplitude > 0] # get rid of -10000
+                (framef.lightmean == framef.lightamplitude)
+                | ((framef.lightmean == 0.0) & (framef.lightamplitude == minamp0))
+            ]
+            frame = frame.loc[frame.lightamplitude > 0]  # get rid of -10000
 
             frame = frame.sort_values(["lightmean", "lightamplitude"])
 
@@ -1304,9 +1222,9 @@ class PlotWeber(PlotBase):
 
         # FILTER TO 0 WITH MIN AMP AND REST 100PCT CONTRAST
         frame = df.loc[
-            (df.lightmean == df.lightamplitude) |
-            ((df.lightmean == 0.0) & (df.lightamplitude == minamp0))]
-        frame = frame.loc[frame.lightamplitude > 0] # get rid of -10000
+            (df.lightmean == df.lightamplitude) | ((df.lightmean == 0.0) & (df.lightamplitude == minamp0))
+        ]
+        frame = frame.loc[frame.lightamplitude > 0]  # get rid of -10000
 
         frame = frame.sort_values(["lightmean", "lightamplitude"])
 
@@ -1323,18 +1241,17 @@ class PlotWeber(PlotBase):
 
         # TODO decide on line labels
         self.ax.plot(topltX, weber(topltX), color=self.colors[genotype], label=f"{genotype}: r2={weber.r2}")
-        self.ax.scatter(*weber.normalize(X, Y),color=self.colors[genotype])
-                        #alpha=0.4
+        self.ax.scatter(*weber.normalize(X, Y), color=self.colors[genotype])
+        # alpha=0.4
 
         logger.info(f"{genotype}: {weber.r2}")
 
-        #if self.cntr > 1:
+        # if self.cntr > 1:
         #    self.ttest()
 
-        #self.ax.legend()
+        # self.ax.legend()
 
-        #self.fits[f"{genotype}mean"] = weber
-
+        # self.fits[f"{genotype}mean"] = weber
 
     def ttest(self):
 
@@ -1352,36 +1269,23 @@ class PlotWeber(PlotBase):
 
                 stars = f"p={p:0.03f}" if stars == "ns" and p < 0.06 else stars
 
-                self.ax.text(
-                    x = lightmean,
-                    y=toppoint,
-                    s=stars,
-                    ha='center',
-                    va='bottom', color='k')
+                self.ax.text(x=lightmean, y=toppoint, s=stars, ha="center", va="bottom", color="k")
 
     def to_csv(self, outputdir: Path = Path(".")):
         data = []
         for label, fit in self.fits.items():
-            row = [
-                label,
-                fit.beta,
-                fit.r2
-            ]
+            row = [label, fit.beta, fit.r2]
             data.append(row)
 
-        df = pd.DataFrame(
-            columns="Label Beta R2".split(),
-            data=data
-        )
+        df = pd.DataFrame(columns="Label Beta R2".split(), data=data)
 
         outputpath = outputdir / (self.filestem + "_Data.csv")
         df.to_csv(outputpath, index=False)
 
-    def to_image(self, *args, **kwargs):
-        ...
+    def to_image(self, *args, **kwargs): ...
 
-    def to_igor(self, *args, **kwargs):
-        ...
+    def to_igor(self, *args, **kwargs): ...
+
 
 class PlotWeberCoeff:
 
@@ -1397,10 +1301,7 @@ class PlotWeberCoeff:
         Xs = []
         xlabels = []
         for ii, (genotype, fits) in enumerate(sorted(self.coeffs.items(), reverse=True)):
-            Y = [
-                fit.ihalf
-                for cellname, fit in fits.items()
-                if cellname != "20210818A2_Cell2"]
+            Y = [fit.ihalf for cellname, fit in fits.items() if cellname != "20210818A2_Cell2"]
             Ys.append(np.mean(Y))
             Ss.append(Y)
             Xs.append(genotype)
@@ -1408,64 +1309,53 @@ class PlotWeberCoeff:
 
             semval = sem(Y)
 
-            self.ax.bar(ii,
+            self.ax.bar(
+                ii,
                 height=np.mean(Y),
                 yerr=semval,
-                width = 0.90,
+                width=0.90,
                 capsize=12,
                 linewidth=2,
                 edgecolor=self.colors[genotype],
-                color = 'None',
+                color="None",
                 label=genotype,
-                tick_label=genotype)
+                tick_label=genotype,
+            )
 
             # PLOT SCATTER
-            self.ax.scatter(
-                np.repeat(ii, len(Y)),
-                Y,
-                alpha=0.25,
-                color=self.colors[genotype])
+            self.ax.scatter(np.repeat(ii, len(Y)), Y, alpha=0.25, color=self.colors[genotype])
 
             # LABEL NUMBER OF CELLS
-            self.ax.text(ii, 0, f"n={len(Y)}",
-                            ha='center', va='bottom', color='k')
+            self.ax.text(ii, 0, f"n={len(Y)}", ha="center", va="bottom", color="k")
 
         # TTEST
-        stat, p = ttest_ind(
-            Ss[0], Ss[1])
+        stat, p = ttest_ind(Ss[0], Ss[1])
 
         stars = p_to_star(p)
         if stars != "ns":
-            #stars = f"p={p:0.03f}" if stars == "ns" and p < 0.06 else stars
+            # stars = f"p={p:0.03f}" if stars == "ns" and p < 0.06 else stars
             # PLOT SIGNFICANCE LABEL
             # HACK PERCENT TO PUT ABOVE MAX POINT. DOESN'T WORK WELL FOR SMALL VALUES
             _, toppoint = ax.get_ylim()
             toppoint = max(np.max(Ss[0]), np.max(Ss[1]))
             pct = 0.05
-            ay, h, col = toppoint + toppoint * pct, toppoint * pct, 'k'
+            ay, h, col = toppoint + toppoint * pct, toppoint * pct, "k"
 
-            ax.plot(
-                [0,0,1,1],
-                [ay, ay+h, ay+h, ay],
-                lw=1.5, color=col)
+            ax.plot([0, 0, 1, 1], [ay, ay + h, ay + h, ay], lw=1.5, color=col)
 
-            ax.text(
-                0.5,
-                ay+h,
-                stars,
-                ha='center',
-                va='bottom')
+            ax.text(0.5, ay + h, stars, ha="center", va="bottom")
 
-        self.ax.set_xticks([0,1])
-        self.ax.tick_params(axis='x', which='both', length=0)
+        self.ax.set_xticks([0, 1])
+        self.ax.tick_params(axis="x", which="both", length=0)
         self.ax.set_xticklabels(xlabels)
 
         plt.locator_params(nbins=3)
 
+
 class PlotContrastResponses(PlotBase):
     cmap = plt.get_cmap("tab10")
 
-    def __init__(self, ax:Axes, eframe:pd.DataFrame, igor=False):
+    def __init__(self, ax: Axes, eframe: pd.DataFrame, igor=False):
         self.ax = ax
         self.ax.grid(False)
 
@@ -1482,14 +1372,11 @@ class PlotContrastResponses(PlotBase):
     def __str__(self):
         return f"{type(self).__name__}({','.join(map(str,self.labels))})"
 
-    def append_trace(self, eframe:pd.DataFrame):
-        """eframe has single lightmean
-        """
+    def append_trace(self, eframe: pd.DataFrame):
+        """eframe has single lightmean"""
         # GET AVERAFE TRACE ACROSS CELLS
         for lightamplitude, frame in eframe.groupby("lightamplitude"):
-            Ys = np.fromiter([
-                epoch.trace
-                for epoch in frame.epoch], dtype=float)
+            Ys = np.fromiter([epoch.trace for epoch in frame.epoch], dtype=float)
             Y = np.mean(Ys, axis=1)
             stimtime = frame.epoch.iloc[0].stimtime
             lightmean = frame.lightmean.iloc[0]
@@ -1497,11 +1384,7 @@ class PlotContrastResponses(PlotBase):
 
             X = np.arange(len(Y)) - stimtime
 
-            self.ax.plot(
-                X,
-                Y, label=lightamplitude / lightmean,
-                color="black",
-                alpha=0.4)
+            self.ax.plot(X, Y, label=lightamplitude / lightmean, color="black", alpha=0.4)
 
         # APPEND VALUES NEEDED FOR WRITING OUT
         self.labels.append(label)
@@ -1514,14 +1397,8 @@ class PlotContrastResponses(PlotBase):
         self.ax.xaxis.set_ticks(xticks)
         self.ax.xaxis.set_ticklabels(xlabels)
 
+    def to_csv(self, *args, **kwargs): ...
 
+    def to_image(self, *args, **kwargs): ...
 
-    def to_csv(self, *args, **kwargs):
-        ...
-
-    def to_image(self, *args, **kwargs):
-        ...
-
-    def to_igor(self, *args, **kwargs):
-        ...
-
+    def to_igor(self, *args, **kwargs): ...

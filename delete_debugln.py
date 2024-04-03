@@ -1,5 +1,7 @@
 import numpy as np
-from dissonance.analysis_functions.linear_nonlinear_model import LinearNonLinearModel
+
+from dissonance.analysis_functions.linear_nonlinear_model import \
+    LinearNonLinearModel
 
 stimulus = np.load("stimulus.npy")
 response = np.load("response.npy")
