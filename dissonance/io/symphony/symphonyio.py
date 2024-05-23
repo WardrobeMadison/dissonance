@@ -30,6 +30,7 @@ class SymphonyIO:
 
         redate = re.compile(r"^(\d\d\d\d)-(\d\d)-(\d\d).*$")
         matches = redate.match(path.name)
+        assert matches is not None
         self.expdate = f"{matches[1]}-{matches[2]}-{matches[3]}"
         self.rstarr = RStarrConverter(self.expdate)
 
@@ -44,10 +45,9 @@ class SymphonyIO:
             logger.warning(error)
 
     def map_protocol(self, protocolname, outputpath):
+        outputpath.parent.mkdir(parents=True, exist_ok=True)
+        self.fout = h5py.File(outputpath, mode="a")
         try:
-            outputpath.parent.mkdir(parents=True, exist_ok=True)
-            self.fout = h5py.File(outputpath, mode="a")
-
             if "experiment" not in self.fout:
                 expgrp = self.fout.create_group("experiment")
             else:
@@ -225,9 +225,9 @@ class SymphonyIO:
             led=protocol.get("led", 0),
         )
 
-        self._rstarr_conversion(protocol, epoch, epochgrp)
+        self._rstarr_conversion(protocol, cell, epoch, epochgrp)
 
-        params["numberofaverages"] = protocol.get("numberOfAverages", 0.0)
+        params["numberofaverages"] = protocol.gt("numberOfAverages", 0.0)
         params["pretime"] = protocol.get("preTime", 0.0)
 
         # HACK need to separate parameter reads by protocol
@@ -259,7 +259,7 @@ class SymphonyIO:
             params.update(sm.LedPairedSineWavePulse(protocol, epoch).params)
         epochgrp.attrs.update(params)
 
-    def _rstarr_conversion(self, protocol, epoch: Epoch, epochgrp):
+    def _rstarr_conversion(self, protocol: Protocol, cell: Cell, epoch: Epoch, epochgrp):
         # HACK IF LEDPULSEFAMILY THEN LIGHTAMPLITUDE IS IN THE EPOCH FOLDER
         # TODO CHANGE READER TO FIND PARAMETERS BASED ON PROTOCOL
         # TODO CHANGE EPOCH CLASSES TO VARY BASED ON PROTOCOL, CELL, ETC...
@@ -292,7 +292,7 @@ class SymphonyIO:
         epochgrp.attrs["lightmeanSU"] = lightmean
 
         rstarr_amp, rstarr_mean = self.rstarr.get(
-            protocol.name, protocol.get("led", None), lightamp, lightmean
+            protocol.name, cell.cellname, protocol.get("led", None), lightamp, lightmean
         )
         epochgrp.attrs["lightamplitude"] = rstarr_amp
         epochgrp.attrs["lightmean"] = rstarr_mean

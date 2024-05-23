@@ -13,27 +13,28 @@ from typing import Tuple
 import numpy as np
 from sklearn.cluster import KMeans
 
-from .. import epochtypes as et
 from .passfilters import high_pass_filter, low_pass_filter
 
 logger = logging.getLogger(__name__)
 
-HIGHPASSCUT_DRIFT = 70
-HIGHPASSCUT_SPIKES = 500
-SAMPLE_INTERVAL = 1e-4
-REF_PERIOD = 2e-3
-SEARCH_INTERVAL = 1e-3
-REF_PERIOD_POINTS = round(REF_PERIOD / SAMPLE_INTERVAL)
-SEARCH_INTERVAL_POINTS = round(SEARCH_INTERVAL / SAMPLE_INTERVAL)
 
-
-def detect_spikes(R: np.array):
+def detect_spikes(
+    R: np.ndarray,
+    highpasscut_drift=70,
+    highpasscut_spikes=100,
+    sample_interval=1e-4,
+    ref_period=2e-3,
+    search_interval=1e-3,
+):
+    # TODO USE these to also output the adjusted spike amplitude
+    ref_period_points = round(ref_period / sample_interval)
     # PASS FILTERS
     R_no_spikes = low_pass_filter(
-        high_pass_filter(R, HIGHPASSCUT_DRIFT, SAMPLE_INTERVAL), HIGHPASSCUT_SPIKES, SAMPLE_INTERVAL
+        high_pass_filter(R, highpasscut_drift, sample_interval), highpasscut_spikes, sample_interval
     )
+    search_interval_points = round(search_interval / sample_interval)
 
-    R_high_pass = high_pass_filter(R, HIGHPASSCUT_SPIKES, SAMPLE_INTERVAL)
+    R_high_pass = high_pass_filter(R, highpasscut_spikes, sample_interval)
 
     # GET TRACE AND NOISE_STD
     trace = R_high_pass.copy()
@@ -43,7 +44,7 @@ def detect_spikes(R: np.array):
     if abs(max(trace)) > abs(min(trace)):
         trace = -trace
 
-    R_no_spikes.std()
+    noise_std = R_no_spikes.std()
 
     # GET PEAKS
     peaks, peak_times = get_peaks(trace, -1)
@@ -68,7 +69,7 @@ def detect_spikes(R: np.array):
     violation_idx = None
     if len(peaks):
         # CHECK FOR REBOUNDS ON THE OTHER SIDE
-        rebounds = get_rebounds(peak_times, trace, SEARCH_INTERVAL_POINTS)
+        rebounds = get_rebounds(peak_times, trace, search_interval_points)
         peaks = abs(peaks)
         peak_amps = peaks + rebounds
 
@@ -77,7 +78,7 @@ def detect_spikes(R: np.array):
             init = np.array([[np.percentile(peak_amps, q=0.5)], [peak_amps.max()]])
 
             clusters = KMeans(n_clusters=2, init=init, n_init=1, max_iter=max_iter).fit(
-                peak_amps.reshape(-1, 1)
+                np.sqrt(peak_amps.reshape(-1, 1))
             )
 
             idx, centroids = clusters.labels_, clusters.cluster_centers_
@@ -115,7 +116,7 @@ def detect_spikes(R: np.array):
     return (sp, violation_idx)
 
 
-def get_rebounds(peaks_idx: np.array, trace_in: np.array, search_interval: float) -> np.array:
+def get_rebounds(peaks_idx: np.ndarray, trace_in: np.ndarray, search_interval: float) -> np.ndarray:
     trace = abs(trace_in)
     peaks = trace[peaks_idx]
     r = np.zeros(peaks.shape)
@@ -142,7 +143,7 @@ def get_rebounds(peaks_idx: np.array, trace_in: np.array, search_interval: float
     return r
 
 
-def get_peaks(R: np.array, direction: int) -> Tuple[np.array, np.array]:
+def get_peaks(R: np.ndarray, direction: int) -> Tuple[np.ndarray, np.ndarray]:
     if direction > 0:
         mat = np.diff(np.diff(R) > 0)
         idx = np.flatnonzero(mat < 0) + 1

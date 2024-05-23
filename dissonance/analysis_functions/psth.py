@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-def calculate_psth(epoch, inc=100, outputfile=None) -> np.array:
+def calculate_psth(epoch, inc=100, outputfile=None) -> np.ndarray:
     """Bin and count number of spikes. Subtract baseline firing rate from final psth."""
     # inc = 100 # 10 ms
     try:

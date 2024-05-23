@@ -89,6 +89,15 @@ def test_update_cell_labels(folder):
         up.update_cell_labels()
 
 
+@pytest.mark.parametrize("folder", folders)
+def test_update_spikes(folder):
+    """Combine cellname and experiment date to make unique code"""
+    wdir = MAP_DIR / folder
+    for file in wdir.glob("*.h5"):
+        up = DissonanceUpdater(file)
+        up.update_spikes()
+
+
 def zip_raw_map_directories(flder):
     filepaths = []
 

@@ -73,7 +73,7 @@ ContrastResponse = Params(
         "startdate",
         "holdingpotential",
     ],
-    splits=["holdingpotential", "genotype", "lightmean", "celltype", "cellname", "lightamplitude"],
+    splits=["holdingpotential", "celltype", "genotype", "lightmean", "lightamplitude", "cellname"],
 )
 
 LedPulseOFFTRodSpikes = Params(
@@ -278,12 +278,17 @@ Weber = Params(
         "holdingpotential",
     ],
     splits=[
-        "holdingpotential",
+        "led",
         "celltype",
+        "holdingpotential",
         "genotype",
         "cellname",
         "lightmean",
         "lightamplitude",
+        # "genotype",
+        # "cellname",
+        # "lightmean",
+        # "lightamplitude",
     ],
 )
 
@@ -312,10 +317,10 @@ SineWavePulse = Params(
     ],
     splits=[
         "holdingpotential",
-        "first_wave_time",
-        "first_wave_frequency",
         "genotype",
         "celltype",
+        "first_wave_time",
+        "first_wave_frequency",
         "first_wave_contrast",
         "second_wave_contrast",
         "cellname",

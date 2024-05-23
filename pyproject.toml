@@ -26,6 +26,9 @@ multiprocess = "^0.70.16"
 black = "^24.3.0"
 isort = "^5.13.2"
 
+[tool.pyright]
+typeCheckingMode = "basic"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"

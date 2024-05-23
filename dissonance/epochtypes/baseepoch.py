@@ -142,7 +142,7 @@ class EpochBlock(ABC):
         return self._trace_len
 
     @property
-    def traces(self) -> np.array:
+    def traces(self) -> np.ndarray:
         # PAD ALL VALUES TO STRETCH INTO FULL ARRAY
         return np.vstack(
             [
@@ -151,11 +151,11 @@ class EpochBlock(ABC):
             ]
         )
 
-    def get(self, paramname) -> np.array:
+    def get(self, paramname) -> np.ndarray:
         try:
             return np.array([getattr(e, paramname) for e in self._epochs], dtype=float)
         except:
             return np.array([getattr(e, paramname) for e in self._epochs], dtype=str)
 
-    def get_unique(self, paramname) -> np.array:
+    def get_unique(self, paramname) -> np.ndarray:
         return np.unique(self.get(paramname))

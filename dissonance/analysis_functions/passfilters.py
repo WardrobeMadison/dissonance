@@ -6,7 +6,7 @@ import numpy as np
 from scipy import fft
 
 
-def low_pass_filter(X: np.array, F: np.array, dt: float) -> np.array:
+def low_pass_filter(X: np.ndarray, F: float, dt: float) -> np.ndarray:
     """
     Filter to cut out high freqnecies about X for cutoff F.
 
@@ -24,13 +24,13 @@ def low_pass_filter(X: np.array, F: np.array, dt: float) -> np.array:
     df = round(F * dt * L)
 
     trans = fft.fft(X)
-    trans[df:-df] = 0
-    xfilt = fft.ifft(trans).real
+    trans[df:-df] = 0  # type: ignore
+    xfilt = fft.ifft(trans).real  # type: ignore
 
     return xfilt
 
 
-def high_pass_filter(X: np.array, F: np.array, dt: float) -> np.array:
+def high_pass_filter(X: np.ndarray, F: float | np.ndarray, dt: float) -> np.ndarray:
     """
     Filter to cut out low freqnecies about X for cutoff F.
 

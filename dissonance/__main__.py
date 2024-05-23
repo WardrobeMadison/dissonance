@@ -17,7 +17,7 @@ logger = init_log()
 class Params:
     name: str
     filter_path: Path
-    protocols: str
+    protocols: list[str]
     paramnames: list[str]
     splits: list[str]
 

@@ -28,11 +28,11 @@ class SpikeEpoch(IEpoch):
         return self.binsize / 10.0
 
     @property
-    def spikes(self) -> np.array:
-        return np.array(self._spikegrp[:], dtype=int)
+    def spikes(self) -> np.ndarray:
+        return np.array(self._spikegrp[:], dtype=int)  # type:ignore
 
     @property
-    def psth(self) -> np.array:
+    def psth(self) -> np.ndarray:
         if self._psth is None:
             self._psth = calculate_psth(self)
         return self._psth
@@ -40,7 +40,7 @@ class SpikeEpoch(IEpoch):
     @property
     def timetopeak(self) -> float:
         rng = self.peak_window_range
-        return rng[0] // 100 + np.argmax(self.psth[rng[0] // 100 : rng[1] // 100])
+        return float(rng[0] // 100 + np.argmax(self.psth[rng[0] // 100 : rng[1] // 100]))
 
     @property
     def peakamplitude(self) -> float:
@@ -60,11 +60,11 @@ class SpikeEpochs(EpochBlock):
 
     type = "spiketrace"
 
-    def __init__(self, traces: List[IEpoch]):
+    def __init__(self, traces: List[SpikeEpoch]):
         super().__init__(traces)
-        self._psth: np.array = None
-        self._psths: np.array = None
-        self._hillfit: np.array = None
+        self._psth: np.ndarray = None
+        self._psths: np.ndarray = None
+        self._hillfit: np.ndarray = None
         self.rng = traces[0].peak_window_range
 
     @property
@@ -74,7 +74,7 @@ class SpikeEpochs(EpochBlock):
         return self._psth
 
     @property
-    def psths(self) -> np.array:
+    def psths(self) -> np.ndarray:
         inc = 100
         if self._psths is None:
             self._psths = []
@@ -86,7 +86,7 @@ class SpikeEpochs(EpochBlock):
 
     @property
     def timetopeak(self) -> float:
-        return self.rng[0] // 100 + np.argmax(self.psth[self.rng[0] // 100 : self.rng[1] // 100])
+        return float(self.rng[0] // 100 + np.argmax(self.psth[self.rng[0] // 100 : self.rng[1] // 100]))
 
     @property
     def peakamplitude(self) -> float:

@@ -9,6 +9,8 @@ import h5py
 import multiprocess as mp
 import pandas as pd
 
+from dissonance.analysis_functions import detect_spikes
+
 from ..analysis.analysistree import AnalysisTree
 from ..epochtypes import epoch_factory
 
@@ -173,6 +175,40 @@ class DissonanceUpdater:
                 epoch.attrs[paramname] = paramval
 
         f.close()
+
+    def update_spikes(
+        self,
+    ) -> None:
+        """Adding attribute to epochs in h5 file
+
+        Args:
+                filename (str): Path to h5py file
+                attr (pd.DataFrame): Indexed on params
+        """
+        f = h5py.File(self.filepath, "r+")
+        try:
+            for name in f["experiment"]:
+                epoch = f[f"experiment/{name}"]
+
+                # get current dataset and trace
+                spikes_dataset = epoch.get("Spikes", None)
+
+                # rerun spike detection
+                if spikes_dataset is not None:
+                    values = epoch["Amp1"][:]
+                    spikes, violationidx = detect_spikes(values)
+
+                    del epoch["Spikes"]
+                    spikes_dataset = epoch.create_dataset(name="Spikes", data=spikes, dtype=float)
+
+                    if violationidx is not None:
+                        spikes_dataset.attrs["violation_idx"] = violationidx
+
+        except Exception as e:
+            f.close()
+            raise e
+        finally:
+            f.close()
 
     def add_genotype(self, genotype):
         f = h5py.File(self.filepath, "r+")
