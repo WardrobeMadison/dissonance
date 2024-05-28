@@ -3,12 +3,12 @@ from abc import ABC, abstractmethod
 from collections import defaultdict
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, Union
+from typing import Dict, Optional, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from matplotlib.pyplot import Axes
+from matplotlib.axes import Axes
 from matplotlib.ticker import MaxNLocator
 from scipy.stats import sem, ttest_ind
 
@@ -98,7 +98,7 @@ class PlotPsth(PlotBase):
     def __init__(
         self,
         ax: Axes,
-        epochs: Union[SpikeEpoch, SpikeEpochs] = None,
+        epochs: Optional[SpikeEpoch| SpikeEpochs]  = None,
         label=None,
         igor=False,
     ):
@@ -140,7 +140,7 @@ class PlotPsth(PlotBase):
             pretime = epochs.get_unique("pretime")[0]
             ttp = (epochs.timetopeak - pretime / 100) / seconds_conversion
         else:
-            psth = np.mean([epoch.psth for epoch in epochs], axis=1)
+            psth = np.mean([epoch.psth for epoch in epochs], axis=1) #type:ignore
             n = len(epochs)
             name = epochs.genotype.iloc[0]
             pretime = epochs.epoch.iloc[0].stimtime
@@ -201,7 +201,7 @@ class PlotRaster(PlotBase):
     def __init__(
         self,
         ax,
-        epochs: Union[SpikeEpoch, SpikeEpochs] = None,
+        epochs: Union[SpikeEpoch, SpikeEpochs] |None = None,
         title=None,
         igor=False,
     ):

@@ -79,12 +79,6 @@ class AdaptingStepsEpoch(IEpoch):
     def type(self) -> str:
         return "ApdatingStepTrace"
 
-    @property
-    def peaks(self): ...
-
-    @property
-    def peaks(self): ...
-
 
 class AdpatingStepsEpochs(EpochBlock):
 

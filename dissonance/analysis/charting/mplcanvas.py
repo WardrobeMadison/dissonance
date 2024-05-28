@@ -1,7 +1,6 @@
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-from matplotlib.backends.backend_qt5agg import \
-    FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 
 mpl.use("Qt5Agg")
@@ -38,9 +37,11 @@ class MplCanvas(FigureCanvas):
         self.axes = self.grid_axis(n, m)
 
     def __getitem__(self, val):
+        assert self.axes
         return self.axes[val]
 
     def __iter__(self):
+        assert self.axes
         yield from self.axes
 
     def grid_axis(self, n: int, m: int):

@@ -11,7 +11,11 @@ class SpikeEpoch(IEpoch):
 
     def __init__(self, epochgrp: h5py.Group):
         super().__init__(epochgrp)
-        self._spikegrp = epochgrp["Spikes"]
+        if "Spikes" in epochgrp:
+            self._spikegrp = epochgrp["Spikes"]
+        else:
+            self._spikegrp = None
+
         self._psth = None
         self._binsize = 100
 
@@ -29,7 +33,10 @@ class SpikeEpoch(IEpoch):
 
     @property
     def spikes(self) -> np.ndarray:
-        return np.array(self._spikegrp[:], dtype=int)  # type:ignore
+        if self._spikegrp is not None:
+            return np.array(self._spikegrp[:], dtype=int)  # type:ignore
+        else:
+            return np.array([])
 
     @property
     def psth(self) -> np.ndarray:

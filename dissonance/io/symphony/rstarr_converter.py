@@ -35,14 +35,23 @@ class RStarrConverter:
         )
         return rstarrdf
 
-    def get(self, protocolname, cellname, led, lightamp, lightmean) -> tuple[float, float]:
+    def get(
+        self,
+        protocolname,
+        cellname,
+        led,
+        lightamp,
+        lightmean,
+    ) -> tuple[float, float]:
         """Get rstarr mapping. Adds to .errors and sets to -10000, -10000 if not found."""
         key = (protocolname, led, lightamp, lightmean)
         amp, mean = self.map.get(key, (-10_000, -10_000))
 
         if ((amp, mean) == (-10_000, -10_000)) or ((amp, mean) == (-10_000, -1_000)):
             amp, mean = -10_000, -10_000
-            logger.warning(f"{protocolname}: {cellname, led, lightamp, lightmean} is not key in the table.")
+            msg = f"RStarrNotFound: {protocolname}: {cellname, led, lightamp, lightmean}"
+            logger.warning(msg)
+            # self.errors.add(msg)
 
         return amp, mean
 

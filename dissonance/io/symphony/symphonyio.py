@@ -159,26 +159,19 @@ class SymphonyIO:
             expgrp = self.fout["experiment"]
             for ii, (cell, protocol, epoch) in enumerate(self.reader()):
                 group_name = f"epoch{epoch.startdate.timestamp()}"
+                # 1694471871.840082
                 epochgrp = expgrp[group_name]
 
-                try:
+                if "lightamplitude" in epochgrp.attrs.keys():
                     del epochgrp.attrs["lightamplitude"]
-                except KeyError:
-                    ...
-                try:
+                if "lightmean" in epochgrp.attrs.keys():
                     del epochgrp.attrs["lightmean"]
-                except KeyError:
-                    ...
-                try:
+                if "lightamplitudeSU" in epochgrp.attrs.keys():
                     del epochgrp.attrs["lightamplitudeSU"]
-                except KeyError:
-                    ...
-                try:
+                if "lightmeanSU" in epochgrp.attrs.keys():
                     del epochgrp.attrs["lightmeanSU"]
-                except KeyError:
-                    ...
 
-                self._rstarr_conversion(protocol, epoch, epochgrp)
+                self._rstarr_conversion(protocol, cell, epoch, epochgrp)
 
         except Exception as e:
             if self.fout is not None:
@@ -285,14 +278,14 @@ class SymphonyIO:
         elif lightmean is None:
             lightmean = 0.0
             logging.warning(
-                f"{(protocol.name, self.finpath.parent, self.finpath.stem, str(epoch.startdate))}: no lightmean"
+                f"{(cell.cellname, protocol.name, self.finpath.parent, self.finpath.stem, str(epoch.startdate))}: no lightmean"
             )
 
         epochgrp.attrs["lightamplitudeSU"] = lightamp
         epochgrp.attrs["lightmeanSU"] = lightmean
 
         rstarr_amp, rstarr_mean = self.rstarr.get(
-            protocol.name, cell.cellname, protocol.get("led", None), lightamp, lightmean
+            protocol.name, cell.cellkey, protocol.get("led", None), lightamp, lightmean
         )
         epochgrp.attrs["lightamplitude"] = rstarr_amp
         epochgrp.attrs["lightmean"] = rstarr_mean
