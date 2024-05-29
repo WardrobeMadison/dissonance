@@ -5,9 +5,9 @@ import numpy as np
 def calculate_psth(epoch, inc=100, outputfile=None) -> np.ndarray:
     """Bin and count number of spikes. Subtract baseline firing rate from final psth."""
     # inc = 100 # 10 ms
-    try:
+    if hasattr(epoch, "traces"):
         x = np.zeros(epoch.traces.shape)
-    except:
+    else:
         x = np.zeros(epoch.trace.shape)
 
     x[epoch.spikes] = 1

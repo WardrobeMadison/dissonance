@@ -3,7 +3,7 @@ from functools import partial
 from pathlib import Path
 
 import pytest
-from multiprocess import Pool
+from multiprocessing import Pool
 
 import dissonance.io.symphony.symphonyio
 from dissonance import epochtypes, init_log, io, viewer
@@ -24,7 +24,7 @@ def test_all_to_h5(folder):
     wodir.mkdir(parents=True, exist_ok=True)
 
     files = [file for file in wdir.glob("*.h5")]
-    func = partial(write_file, wodir=wodir, overwrite=False)
+    func = partial(write_file, wodir=wodir, overwrite=True)
 
     with Pool(min(len(files), 6)) as p:
         for x in p.imap_unordered(func, files):

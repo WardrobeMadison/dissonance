@@ -51,7 +51,8 @@ class SymphonyIO:
             if "experiment" not in self.fout:
                 expgrp = self.fout.create_group("experiment")
             else:
-                expgrp = self.fout["experiment"]
+                #expgrp = self.fout["experiment"]
+                expgrp = self.fout.require_group(self.fout)
 
             for ii, (cell, protocol, epoch) in enumerate(self.reader()):
                 if protocol.name == protocolname:
@@ -101,7 +102,8 @@ class SymphonyIO:
                 self.fout.close()
             raise e
         finally:
-            self.fout.close()
+            if self.fout is not None:
+                self.fout.close()
 
     def update(self, outputpath, attrs=False, responses=False, stimuli=False):
         try:
@@ -188,7 +190,7 @@ class SymphonyIO:
             for key, val in stimuli:
                 stimds.attrs[key.lower()] = val
 
-    def _update_response(self, epoch: h5py.Group, epochgrp: h5py.Group):
+    def _update_response(self, epoch: Epoch, epochgrp: h5py.Group):
         for response in epoch.responses:
             values = response.data
             ds = epochgrp.create_dataset(name=response.name, data=values, dtype=float)
@@ -220,7 +222,7 @@ class SymphonyIO:
 
         self._rstarr_conversion(protocol, cell, epoch, epochgrp)
 
-        params["numberofaverages"] = protocol.gt("numberOfAverages", 0.0)
+        params["numberofaverages"] = protocol.get("numberOfAverages", 0.0)
         params["pretime"] = protocol.get("preTime", 0.0)
 
         # HACK need to separate parameter reads by protocol

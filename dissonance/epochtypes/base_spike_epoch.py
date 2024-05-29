@@ -87,7 +87,7 @@ class SpikeEpochs(EpochBlock):
             self._psths = []
             for trace in self._epochs:
                 if len(trace.psth) > 0 and trace.psth is not None:
-                    cpsth = np.pad(trace.psth, (0, int(self.trace_len // inc - len(trace.psth))))
+                    cpsth = np.pad(trace.psth, (0, max(int(self.trace_len // inc - len(trace.psth)),0)))
                     self._psths.append(cpsth)
         return np.array(self._psths, dtype=float)
 
