@@ -2,9 +2,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-def calculate_psth(epoch, inc=100, outputfile=None) -> np.ndarray:
+def calculate_psth(epoch, inc=50, outputfile=None, samplerate = 10000) -> np.ndarray:
     """Bin and count number of spikes. Subtract baseline firing rate from final psth."""
-    # inc = 100 # 10 ms
+    # WHERE INC = (BIN SIZE IN MS) *10
     if hasattr(epoch, "traces"):
         x = np.zeros(epoch.traces.shape)
     else:
@@ -14,6 +14,6 @@ def calculate_psth(epoch, inc=100, outputfile=None) -> np.ndarray:
     psth = np.fromiter([np.sum(x[ii : ii + inc]) for ii in range(0, epoch.trace.shape[0], inc)], dtype=float)
 
     # adjust for baseline
-    psth = 100 * (psth - np.mean(psth[: int(epoch.pretime // 100)]))
+    psth = (samplerate/inc) * (psth - np.mean(psth[: int(epoch.pretime // inc)]))
 
     return psth

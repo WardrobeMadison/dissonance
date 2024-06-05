@@ -146,7 +146,8 @@ class PlotPsth(PlotBase):
             pretime = epochs.epoch.iloc[0].stimtime
 
         # CALCULATE TTP AND MAX PEAK
-        X = (np.arange(len(psth)) - pretime / 100) / (seconds_conversion)
+        # TODO make dynamic to psth increment argument
+        X = (np.arange(len(psth)) - pretime / 50) / (seconds_conversion)
 
         # PLOT VALUES SHIFT BY STIM TIME - DOTTED LINED FOR BOTH TTP AND PEAK AMP
         peakamp = epochs.peakamplitude
@@ -430,8 +431,11 @@ class PlotTrace(PlotBase):
 
         # PLOT SPIKES IF SPIKETRACE
         if hasattr(epoch, "spikes"):
-            y = epoch.trace[epoch.spikes]
-            self.ax.scatter(epoch.spikes - pretime, y, marker="x", color=self.colors[epoch.genotype])
+            try:
+                y = epoch.trace[epoch.spikes]
+                self.ax.scatter(epoch.spikes - pretime, y, marker="x", color=self.colors[epoch.genotype])
+            except IndexError:
+                logger.warning("No spikes found")
 
         # IF WHOLE TRACE AND HAS SPIKES, PLOT INTERPOLATED TOO
         X = np.arange(len(epoch.trace)) - pretime

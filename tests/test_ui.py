@@ -73,7 +73,7 @@ ContrastResponse = Params(
         "startdate",
         "holdingpotential",
     ],
-    splits=["holdingpotential", "celltype", "genotype", "lightmean", "lightamplitude", "cellname"],
+    splits=["holdingpotential", "celltype", "genotype", "lightmean", "cellname", "lightamplitude",],
 )
 
 LedPulseOFFTRodSpikes = Params(
@@ -233,7 +233,7 @@ PairedPulse = Params(
         "startdate",
         "holdingpotential",
     ],
-    splits=["genotype", "celltype", "cellname", "intime2"],
+    splits=["holdingpotential","genotype", "celltype", "cellname",],
 )
 
 ExpandingSpots = Params(

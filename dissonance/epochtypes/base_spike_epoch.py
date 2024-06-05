@@ -18,6 +18,7 @@ class SpikeEpoch(IEpoch):
 
         self._psth = None
         self._binsize = 100
+        self.inc = 50
 
     @property
     def binsize(self):
@@ -41,18 +42,18 @@ class SpikeEpoch(IEpoch):
     @property
     def psth(self) -> np.ndarray:
         if self._psth is None:
-            self._psth = calculate_psth(self)
+            self._psth = calculate_psth(self, inc = self.inc)
         return self._psth
 
     @property
     def timetopeak(self) -> float:
         rng = self.peak_window_range
-        return float(rng[0] // 100 + np.argmax(self.psth[rng[0] // 100 : rng[1] // 100]))
+        return float(rng[0] // 100 + np.argmax(self.psth[rng[0] // self.inc : rng[1] // self.inc]))
 
     @property
     def peakamplitude(self) -> float:
         rng = self.peak_window_range
-        return np.max(self.psth[rng[0] // 100 : rng[1] // 100])
+        return np.max(self.psth[rng[0] // self.inc : rng[1] // self.inc])
 
     @property
     def timetopeaksec(self) -> float:
