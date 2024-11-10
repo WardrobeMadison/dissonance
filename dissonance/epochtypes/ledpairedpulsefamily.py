@@ -64,10 +64,12 @@ class LedPairedPulseFamilyEpochs(EpochBlock):
     type = "ledpairedpulsefamilytraces"
     def __init__(self, epochs: List[LedPairedPulseFamilyEpoch]):
         super().__init__(epochs)
-
         
         self.holdingpotential = epochs[0].holdingpotential
         self.backgroundval = epochs[0].backgroundval
+        self.pretime = self.get_unique("pretime")[0]
+        self.stimtime1 = self.get_unique("stimtime1")[0]
+        self.intime2 = self.get_unique("intime2")[0]
 
     @property
     def peak1(self) -> float:

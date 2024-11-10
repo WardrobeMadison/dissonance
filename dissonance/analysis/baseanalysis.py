@@ -1,5 +1,5 @@
-from abc import ABC, abstractproperty
-from typing import List
+from abc import ABC, abstractmethod, abstractproperty
+from typing import List, Optional
 
 import pandas as pd
 
@@ -10,20 +10,20 @@ from .charting import MplCanvas
 class IAnalysis(ABC):
 
     @property
-    @abstractproperty
+    @abstractmethod
     def name(self): ...
 
     @property
-    @abstractproperty
+    @abstractmethod
     def labels(self) -> List[str]: ...
 
     @property
-    @abstractproperty
+    @abstractmethod
     def tracetype(self) -> IEpoch: ...
 
     @property
-    @abstractproperty
+    @abstractmethod
     def tracestype(self) -> EpochBlock: ...
 
-    @abstractproperty
-    def plot(self, eframe: pd.DataFrame, canvas: MplCanvas = None): ...
+    @abstractmethod
+    def plot(self, eframe: pd.DataFrame, canvas: Optional[MplCanvas] = None): ...

@@ -75,7 +75,7 @@ def detect_spikes(
 
         if len(peaks) and np.max(R) > np.min(R):
             max_iter = 10000
-            init = np.array([[np.percentile(peak_amps, q=0.5)], [peak_amps.max()]])
+            init = np.array([[np.sqrt(np.percentile(peak_amps, q=0.5))], [np.sqrt(peak_amps.max())]])
 
             clusters = KMeans(n_clusters=2, init=init, n_init=1, max_iter=max_iter).fit(
                 np.sqrt(peak_amps.reshape(-1, 1))

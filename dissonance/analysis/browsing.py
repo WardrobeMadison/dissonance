@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 import pandas as pd
 
@@ -18,7 +18,7 @@ class BrowsingAnalysis(IAnalysis):
     def __str__(self):
         return type(self).__name__
 
-    def plot(self, level: str, eframe: pd.DataFrame, canvas: MplCanvas = None):
+    def plot(self, level: str, eframe: pd.DataFrame, canvas: Optional[MplCanvas] = None):
         """Map node level to analysis run & plots created."""
         self.currentplots = []
         self.canvas = canvas
@@ -29,6 +29,11 @@ class BrowsingAnalysis(IAnalysis):
             self.plot_summary_epochs(eframe, self.canvas)
         elif level == "lightamplitude":
             self.plot_summary_epochs(eframe, self.canvas)
+        elif (level == "cellname") and (eframe.protocolname.iloc[0] == "LedPairedSineWavePulse") and (eframe.tracetype.iloc[0] == "spiketrace"):
+            self.plot_summary_epochs(eframe, self.canvas)
+        elif (level == "intime2") and (eframe.protocolname.iloc[0] == "LedPairedPulseFamily"):
+            self.plot_summary_epochs(eframe, self.canvas)
+        
 
     def plot_single_epoch(self, eframe: pd.DataFrame, canvas):
 
@@ -37,7 +42,7 @@ class BrowsingAnalysis(IAnalysis):
         plttr = PlotTrace(axes[0], epoch)
         self.currentplots.append(plttr)
 
-    def plot_summary_epochs(self, eframe: pd.DataFrame, canvas: MplCanvas = None):
+    def plot_summary_epochs(self, eframe: pd.DataFrame, canvas: Optional[MplCanvas] = None):
         """Plot faceted mean psth"""
 
         if eframe.tracetype.iloc[0] == "spiketrace":

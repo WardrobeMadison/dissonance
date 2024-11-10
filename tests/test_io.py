@@ -33,7 +33,7 @@ def test_all_to_h5(folder):
 
 @pytest.mark.parametrize("folder", folders)
 def test_map_protocol(folder):
-    protocolname = "LedPairedSineWavePulse"
+    protocolname = "adaptingsteps"
     wdir = RAW_DIR / folder
 
     wodir = MAP_DIR / folder
@@ -65,6 +65,7 @@ def get_missing_files():
 
 
 files = get_missing_files()
+files = [("GG2 control", "2024-10-02B.h5"),("GG2 KO","2024-10-09B2.h5"),("GG2 KO", "2024-10-09A")]
 
 
 @pytest.mark.parametrize("geno,filename", files, ids=(f"{x} {y}" for x, y in files))

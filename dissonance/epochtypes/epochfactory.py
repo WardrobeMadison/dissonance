@@ -5,11 +5,12 @@ from dissonance.epochtypes.expandingspots import ExpandingSpotsEpoch
 from .adaptingsteps import AdaptingStepsEpoch
 from .chirpepoch import ChirpEpoch
 from .ledpairedpulsefamily import LedPairedPulseFamilyEpoch
-from .ledpairedsinewavepulse import LedPairedSineWavePulseEpoch
+from .ledpairedsinewavepulse import LedPairedSineWavePulseEpoch, LedPairedSineWavePulseSpikeEpoch, LedPairedSineWavePulseWholeEpoch
 from .ledpulse import LedPulseSpikeEpoch, LedPulseWholeEpoch
 from .ledpulsefamily import LedPulseFamilySpikeEpoch, LedPulseFamilyWholeEpoch
 from .noiseepoch import NoiseEpoch
 from .sacaadeepoch import SaccadeSpikeEpoch, SaccadeWholeEpoch
+from .ledmultiplewavepulse import LedMultipleWavePulseEpoch, LedMultipleWavePulseEpochs
 
 EpochType = (
     LedPulseSpikeEpoch
@@ -22,7 +23,9 @@ EpochType = (
     | ChirpEpoch
     | LedPairedPulseFamilyEpoch
     | AdaptingStepsEpoch
-    | LedPairedSineWavePulseEpoch
+    | LedPairedSineWavePulseSpikeEpoch
+    | LedPairedSineWavePulseWholeEpoch
+    | LedMultipleWavePulseEpoch
 )
 
 
@@ -65,7 +68,14 @@ def epoch_factory(epochgrp: h5py.Group) -> EpochType:
             return LedPulseWholeEpoch(epochgrp)
 
     elif protocolname in ("LedPairedSineWavePulse",):
-        return LedPairedSineWavePulseEpoch(epochgrp)
+        tracetype = epochgrp.attrs["tracetype"]
+        if tracetype == "spiketrace":
+            return LedPairedSineWavePulseSpikeEpoch(epochgrp)
+        elif tracetype == "wholetrace":
+            return LedPairedSineWavePulseWholeEpoch(epochgrp)
+
+    elif protocolname == "LedMultipleWavePulse":
+        return LedMultipleWavePulseEpoch(epochgrp)
 
     else:
         raise NotImplementedError(f"Trace type not yet specified for {epochgrp}")

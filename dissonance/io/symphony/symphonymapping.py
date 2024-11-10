@@ -1,3 +1,5 @@
+import numpy as np 
+
 class BaseProtocolParams:
     protocolnames = tuple()
 
@@ -62,8 +64,10 @@ class ExpandingSpotsParams:
         )
 
 
+
+#"2022-06-28B.h5
 class AdapatingSteps:
-    protocolnames = ("adapatingsteps",)
+    protocolnames = ("adaptingsteps",)
 
     def __init__(self, protocol, epoch):
         self.params = dict(
@@ -75,6 +79,7 @@ class AdapatingSteps:
             fixed_step_flash_amp=protocol["fixedStepFlashAmp"],
             fixed_post_flash_time=protocol["fixedPostFlashTime"],
             fixed_pre_flash_time=protocol["fixedPreFlashTime"],
+            pretime=protocol["fixedPreFlashTime"],
             fixed_step_flash_time=protocol["fixedStepFlashTime"],
             step_stim=protocol["stepStim"],
             step_pre=protocol["stepPre"],
@@ -126,3 +131,27 @@ class LedPairedSquareWavePulse:
             second_wave_time=protocol["secondWaveTime"],
             tailtime=protocol["tailTime"],
         )
+
+
+class MultipleWavePulse:
+    protocolnames = ("ledmultiplewavepulse",)
+
+    def __init__(self, protocol, epoch):
+        self.params = dict(
+            in_times=protocol["inTimes"],
+            led=protocol["led"],
+            light_mean=protocol["lightMean"],
+            pre_time=protocol["preTime"],
+            tail_time=protocol["tailTime"],
+            wave_contrasts=self._convert_array_to_string(protocol["waveContrasts"]),
+            wave_frequencies=self._convert_array_to_string(protocol["waveFrequencies"]),
+            wave_times=self._convert_array_to_string(protocol["waveTimes"]),
+            wave_types=self._convert_array_to_string(protocol["waveTypes"]),
+        )
+
+    @staticmethod
+    def _convert_array_to_string(val):
+        if isinstance(val, (list, np.ndarray)):
+            return "_".join((str(v) for v in val))
+        else:
+            return str(val)

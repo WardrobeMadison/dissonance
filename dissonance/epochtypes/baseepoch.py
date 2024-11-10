@@ -1,4 +1,4 @@
-from abc import ABC, abstractproperty
+from abc import ABC, abstractmethod, abstractproperty
 from typing import Dict, Iterable, List, Tuple
 
 import h5py
@@ -22,15 +22,15 @@ class IEpoch(ABC):
         self.amp = epochgrp.attrs.get("amp")
         self.interpulseinterval = epochgrp.attrs.get("interpulseinterval")
         self.led = epochgrp.attrs.get("led")
-        self.lightamplitude = epochgrp.attrs.get("lightamplitude")
-        self.lightmean = epochgrp.attrs.get("lightmean")
+        self.lightamplitude = epochgrp.attrs.get("lightamplitude", 0.0)
+        self.lightmean = epochgrp.attrs.get("lightmean", 0.0)
         self.lightamplitudeSU = epochgrp.attrs.get("lightamplitude", 0.0)
         self.lightmeanSU = epochgrp.attrs.get("lightmean", 0.0)
         self.numberofaverages = epochgrp.attrs.get("numberofaverages")
         self.samplerate = epochgrp.attrs.get("samplerate")
-        self.pretime = epochgrp.attrs.get("pretime") * 10
-        self.stimtime = epochgrp.attrs.get("stimtime") * 10
-        self.tailtime = epochgrp.attrs.get("tailtime") * 10
+        self.pretime = epochgrp.attrs.get("pretime", 0) * 10
+        self.stimtime = epochgrp.attrs.get("stimtime", 0) * 10
+        self.tailtime = epochgrp.attrs.get("tailtime", 0) * 10
         self.startdate = epochgrp.attrs.get("startdate")
         self.enddate = epochgrp.attrs.get("enddate")
         self.number = float(epochgrp.name.split("/")[-1][5:])
@@ -75,11 +75,11 @@ class IEpoch(ABC):
             print(f"Can't change {paramname} to {value}")
 
     @property
-    def trace(self):
-        return self._response_ds[:]
+    def trace(self) -> np.ndarray:
+        return self._response_ds[:] # type:ignore
 
     @property
-    @abstractproperty
+    @abstractmethod
     def type(self): ...
 
     def get(self, paramname):
@@ -91,6 +91,10 @@ class IEpoch(ABC):
     def params(self) -> Dict:
         return dict()
 
+    @property
+    def average_baseline(self) -> float:
+        return np.mean(self._reponse_ds[: int(self.pretime)]) # type:ignore
+    
 
 class EpochBlock(ABC):
 
@@ -150,6 +154,12 @@ class EpochBlock(ABC):
                 for epoch in self._epochs
             ]
         )
+
+    @property
+    def average_baseline(self) -> float:
+        baseline = [epoch.average_baseline for epoch in self._epochs]
+        avg = np.mean(baseline, axis=0)
+        return avg
 
     def get(self, paramname) -> np.ndarray:
         try:

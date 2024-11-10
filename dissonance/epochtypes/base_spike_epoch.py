@@ -18,7 +18,7 @@ class SpikeEpoch(IEpoch):
 
         self._psth = None
         self._binsize = 100
-        self.inc = 50
+        self.inc = 100
 
     @property
     def binsize(self):
@@ -34,7 +34,7 @@ class SpikeEpoch(IEpoch):
 
     @property
     def spikes(self) -> np.ndarray:
-        if self._spikegrp is not None:
+        if (self._spikegrp is not None) and (self._spikegrp.shape is not None):
             return np.array(self._spikegrp[:], dtype=int)  # type:ignore
         else:
             return np.array([])

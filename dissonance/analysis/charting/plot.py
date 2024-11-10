@@ -147,7 +147,7 @@ class PlotPsth(PlotBase):
 
         # CALCULATE TTP AND MAX PEAK
         # TODO make dynamic to psth increment argument
-        X = (np.arange(len(psth)) - pretime / 50) / (seconds_conversion)
+        X = (np.arange(len(psth)) - pretime / 100) / (seconds_conversion)
 
         # PLOT VALUES SHIFT BY STIM TIME - DOTTED LINED FOR BOTH TTP AND PEAK AMP
         peakamp = epochs.peakamplitude
@@ -346,26 +346,27 @@ class PlotWholeTrace(PlotBase):
         else:
             color = self.colors[genotype]
 
-        # PLOT HALF WIDTH
-        whm = epoch.width_at_half_max
-        start, stop = epoch.widthrange
-        peakamp = epoch.peakamplitude
-        ttp = epoch.timetopeak - pretime
-        metricstr = f"whm={whm},ttp={ttp},pa={peakamp:.0f}"
-        label += "\n" + metricstr
-
         # PLOT TRACE VALUES
         X = np.arange(len(epoch.trace)) - pretime
         self.ax.plot(X, epoch.trace, label=label, color=color, alpha=0.4)
 
-        # HORIZONTAL LINE ACROSS HALF MAX
-        y1, y2 = epoch.trace[start], epoch.trace[stop]
-        x1, x2 = start - pretime, stop - pretime
+        # PLOT HALF WIDTH
+        if hasattr(epoch, "width_at_half_max"):
+            whm = epoch.width_at_half_max
+            start, stop = epoch.widthrange
+            peakamp = epoch.peakamplitude
+            ttp = epoch.timetopeak - pretime
+            metricstr = f"whm={whm},ttp={ttp},pa={peakamp:.0f}"
+            label += "\n" + metricstr
 
-        self.ax.plot([x1, x2], [y1, y2], "--", color=color)
+            # HORIZONTAL LINE ACROSS HALF MAX
+            y1, y2 = epoch.trace[start], epoch.trace[stop]
+            x1, x2 = start - pretime, stop - pretime
+            self.ax.plot([x1, x2], [y1, y2], "--", color=color)
 
-        # MARKER ON PEAK AMPLITUDE
-        self.ax.scatter(ttp, epoch.peakamplitude, marker="x", color=color)
+
+            # MARKER ON PEAK AMPLITUDE
+            self.ax.scatter(ttp, epoch.peakamplitude, marker="x", color=color)
 
         # APPEND VALUES NEEDED FOR WRITING OUT
         self.labels.append(label)

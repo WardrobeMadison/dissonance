@@ -3,7 +3,6 @@ from typing import List
 
 import h5py
 import numpy as np
-from pyparsing import Empty
 from scipy.stats import sem
 
 from ..analysis_functions import hill
@@ -37,16 +36,10 @@ class AdaptingStepsEpoch(IEpoch):
         self.variable_post_flash_amp = epochgrp.attrs["variable_post_flash_amp"]
         self.variable_step_flash_amp = epochgrp.attrs["variable_step_flash_amp"]
 
-        self.stimulus = epochgrp["UV LED"]
-
-        self._stim_steps = defaultdict(dict)
-        for key, paramval in self.stimulus.attrs.items():
-            ledname, param = key.splt("_")
-            self._stim_steps[ledname][param] = paramval
-
-    @property
-    def stim_steps(self):
-        return self._stim_steps
+        # NOTE assuming there is only UV LED
+        self.stimulus = dict()
+        for key, paramval in epochgrp["stimuli"]["UV LED"]:
+            self.stimulus[key] = paramval
 
     @property
     def first_window(self):
@@ -73,7 +66,7 @@ class AdaptingStepsEpoch(IEpoch):
     @property
     def trace(self):
         vals = self._response_ds[:]
-        return vals
+        return vals - np.mean(vals[: int(self.pretime)])
 
     @property
     def type(self) -> str:

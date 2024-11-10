@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "dissonance"
-version = "0.1.5"
+version = "0.1.11"
 description = ""
 authors = ["Joe Farchione"]
 readme = "README.md"
@@ -25,6 +25,9 @@ pytest = "^8.1.1"
 multiprocess = "^0.70.16"
 black = "^24.3.0"
 isort = "^5.13.2"
+
+[tool.poetry.group.dev.dependencies]
+vitables = "^3.0.3"
 
 [tool.pyright]
 typeCheckingMode = "basic"

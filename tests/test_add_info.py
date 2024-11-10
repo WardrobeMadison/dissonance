@@ -1,6 +1,6 @@
 import sys
 
-from multiprocess import Pool
+from multiprocessing import Pool
 
 from dissonance.io.symphony.rstarr_converter import RStarrConverter
 from dissonance.io.symphony.symphonyio import SymphonyIO
@@ -98,7 +98,7 @@ def test_update_spikes(folder):
         up.update_spikes()
 
 
-def zip_raw_map_directories(flder):
+def zip_raw_map_directories(flder) -> list[tuple[Path, Path]]:
     filepaths = []
 
     rawfiles = [file for file in (RAW_DIR / flder).glob("*.h5")]

@@ -10,6 +10,7 @@ from . import ledpairedsinewavepulse as wp
 from . import ledpulse as st
 from . import ledpulsefamily as fa
 from . import sacaadeepoch as sa
+from . import ledmultiplewavepulse as lm
 
 
 def groupby(frame: pd.DataFrame, grpkeys) -> pd.DataFrame:
@@ -46,8 +47,13 @@ def groupby(frame: pd.DataFrame, grpkeys) -> pd.DataFrame:
     elif epochtype == es.ExpandingSpotsEpoch:
         types = es.ExpandingsSpotsEpochs
 
-    elif epochtype == wp.LedPairedSineWavePulseEpoch:
-        types = wp.LedPairedSineWavePulseEpochs
+    elif epochtype == wp.LedPairedSineWavePulseSpikeEpoch:
+        types = wp.LedPairedSineWavePulseSpikeEpochs
+    elif epochtype == wp.LedPairedSineWavePulseWholeEpoch:
+        types = wp.LedPairedSineWavePulseWholeEpochs
+
+    elif epochtype == lm.LedMultipleWavePulseEpoch:
+        types = lm.LedMultipleWavePulseEpochs
     else:
         raise NotImplementedError()
 

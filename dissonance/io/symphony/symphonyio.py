@@ -48,14 +48,10 @@ class SymphonyIO:
         outputpath.parent.mkdir(parents=True, exist_ok=True)
         self.fout = h5py.File(outputpath, mode="a")
         try:
-            if "experiment" not in self.fout:
-                expgrp = self.fout.create_group("experiment")
-            else:
-                #expgrp = self.fout["experiment"]
-                expgrp = self.fout.require_group(self.fout)
+            expgrp = self.fout.require_group("experiment")
 
             for ii, (cell, protocol, epoch) in enumerate(self.reader()):
-                if protocol.name == protocolname:
+                if protocol.name.lower() == protocolname.lower():
                     # label each epoch with it's timestamp
                     # delete the epoch if it currently exists
                     group_name = f"epoch{epoch.startdate.timestamp()}"
@@ -94,8 +90,10 @@ class SymphonyIO:
                 # ADD RESPONSE DATA - CACHE SPIKES
                 self._update_response(epoch, epochgrp)
 
-                # ADD GROUP FOR EACH STIMULUS
+
                 self._update_stimuli(epoch, epochgrp)
+
+                self.fout.flush()
 
         except Exception as e:
             if self.fout is not None:
@@ -226,9 +224,9 @@ class SymphonyIO:
         params["pretime"] = protocol.get("preTime", 0.0)
 
         # HACK need to separate parameter reads by protocol
-        try:
+        if epoch.backgrounds.__contains__("Amp1"):
             epochgrp.attrs["backgroundval"] = epoch.backgrounds["Amp1"]["value"]
-        except:
+        else:
             epochgrp.attrs["backgroundval"] = 0.0
 
         params.update(
@@ -252,6 +250,8 @@ class SymphonyIO:
             params.update(sm.AdapatingSteps(protocol, epoch).params)
         elif protocol.name.lower() in sm.LedPairedSineWavePulse.protocolnames:
             params.update(sm.LedPairedSineWavePulse(protocol, epoch).params)
+        elif protocol.name.lower() in sm.MultipleWavePulse.protocolnames:
+            params.update(sm.MultipleWavePulse(protocol, epoch).params)
         epochgrp.attrs.update(params)
 
     def _rstarr_conversion(self, protocol: Protocol, cell: Cell, epoch: Epoch, epochgrp):

@@ -40,9 +40,9 @@ Saccade = Params(
 
 AdaptingSteps = Params(
     name="AdaptingSteps",
-    filter_path=Path("~/Projects/analysis/filters/adaptingsteps/adapting_steps_5000.txt"),
-    # filter_path=Path(
-    # "~/Projects/analysis/filters/adaptingsteps/adapting_steps_8000.txt"),
+    #filter_path=Path("~/Projects/analysis/filters/adaptingsteps/adapting_steps_8000.txt"),
+     filter_path=Path(
+     "~/Projects/analysis/filters/adaptingsteps/adapting_steps_8000.txt"),
     protocols=["AdaptingSteps"],
     paramnames=[
         "led",
@@ -53,8 +53,9 @@ AdaptingSteps = Params(
         "cellname",
         "startdate",
         "variable_flash_time",
+        "step_stim",
     ],
-    splits=["genotype", "celltype", "step_magnitude", "cellname", "variable_flash_time"],
+    splits=["step_stim","genotype", "celltype", "step_magnitude", "cellname","variable_flash_time"],
 )
 
 ContrastResponse = Params(
@@ -66,14 +67,14 @@ ContrastResponse = Params(
         "protocolname",
         "celltype",
         "genotype",
-        "cellname",
         "lightmean",
         "lightamplitude",
+        "cellname",
         "tracetype",
         "startdate",
         "holdingpotential",
     ],
-    splits=["holdingpotential", "celltype", "genotype", "lightmean", "cellname", "lightamplitude",],
+    splits=["led","holdingpotential", "celltype", "genotype", "lightmean", "cellname", "lightamplitude",],
 )
 
 LedPulseOFFTRodSpikes = Params(
@@ -233,7 +234,7 @@ PairedPulse = Params(
         "startdate",
         "holdingpotential",
     ],
-    splits=["holdingpotential","genotype", "celltype", "cellname",],
+    splits=["holdingpotential","genotype", "celltype", "cellname","intime2"],
 )
 
 ExpandingSpots = Params(
@@ -279,8 +280,8 @@ Weber = Params(
     ],
     splits=[
         "led",
-        "celltype",
         "holdingpotential",
+        "celltype",
         "genotype",
         "cellname",
         "lightmean",
@@ -294,7 +295,7 @@ Weber = Params(
 
 SineWavePulse = Params(
     name="SineWavePulse",
-    filter_path=Path("~/Projects/analysis/filters/ledpairedpulse/1000rstarLedPairPulseFilters.txt"),
+    filter_path=Path("~/Projects/analysis/filters/pairedsinewave/pairedsinewave.txt"),
     protocols=["LedPairedSineWavePulse"],
     paramnames=[
         "led",
@@ -314,18 +315,86 @@ SineWavePulse = Params(
         "first_wave_time",
         "startdate",
         "holdingpotential",
+        "pretime",
     ],
     splits=[
         "holdingpotential",
-        "genotype",
-        "celltype",
         "first_wave_time",
         "first_wave_frequency",
         "first_wave_contrast",
         "second_wave_contrast",
+        "pretime",
+        "genotype",
         "cellname",
     ],
 )
+
+MultipleWavePulse = Params(
+    name="LedMultipleWavePulse",
+    filter_path=Path("~/Projects/analysis/filters/pairedsinewave/pairedsinewave.txt"),
+    protocols=["LedMultipleWavePulse"],
+    paramnames=[
+        "led",
+        "celltype",
+        "genotype",
+        "cellname",
+        "tracetype",
+        "backgroundval",
+        "lightmean",
+        "protocolname",
+        "startdate",
+        "holdingpotential",
+        "pretime",
+        "wave_times",
+        "wave_types",
+        "wave_contrasts",
+        "wave_frequencies",
+    ],
+    splits=[
+        "holdingpotential",
+        "pretime",
+        "genotype",
+        "wave_times",
+        "wave_types",
+        "wave_contrasts",
+        "wave_frequencies",
+        "cellname"
+    ],
+)
+
+CRFMultipleWavePulse = Params(
+    name="CRFLedMultipleWavePulse",
+    filter_path=Path("~/Projects/analysis/filters/MultipleWave/CRFMultipleWave.txt"),
+    protocols=["LedMultipleWavePulse"],
+    paramnames=[
+        "led",
+        "celltype",
+        "genotype",
+        "cellname",
+        "tracetype",
+        "backgroundval",
+        "lightmean",
+        "protocolname",
+        "startdate",
+        "holdingpotential",
+        "pretime",
+        "wave_times",
+        "wave_types",
+        "wave_contrasts",
+        "wave_frequencies",
+    ],
+    splits=[
+        "holdingpotential",
+        "pretime",
+        "wave_types",
+        "wave_times",
+        "wave_frequencies",
+        "genotype",
+        "cellname",
+        "wave_contrasts",
+    ],
+)
+
 
 
 parameters = [
@@ -341,6 +410,8 @@ parameters = [
     (["GG2 KO", "GG2 control"], SineWavePulse),
     (["GA1 KO", "GA1 control"], GA1SpikesFamily),
     (["GA1 KO", "GA1 control"], GA1ExcitationFamily),
+    (["GG2 KO","GG2 control"], MultipleWavePulse),
+    (["GG2 KO","GG2 control"], CRFMultipleWavePulse),
 ]
 
 
